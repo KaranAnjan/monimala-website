@@ -1,0 +1,174 @@
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useProduct } from '../../hooks/useProducts'
+import { useCart } from '../../context/CartContext'
+import Loading from '../../components/common/Loading'
+import { ArrowLeft, Package, IndianRupee, ShoppingCart, MessageCircle, Phone } from 'lucide-react'
+import { getImageUrl } from '../../lib/supabaseClient'
+import toast from 'react-hot-toast'
+
+const ProductDetail = () => {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const { product, loading } = useProduct(id)
+  const { addToCart } = useCart()
+  const phone = import.meta.env.VITE_PHONE || '+917407437378'
+
+  if (loading) return <Loading />
+  if (!product) return <div className="text-center py-16 text-lg text-gray-500">Product not found</div>
+
+  const handleAddToCart = () => {
+    addToCart(product)
+    toast.success('Added to cart!', { icon: '🛒' })
+  }
+
+  const handleWhatsApp = () => {
+    const message = `Hi, I'm interested in:\n\nProduct: ${product.product_name}\nCode: ${product.product_code}\nPrice: ₹${product.price}`
+    const encodedMessage = encodeURIComponent(message)
+    window.open(
+      `https://wa.me/${phone.replace(/[^0-9]/g, '')}?text=${encodedMessage}`,
+      '_blank'
+    )
+  }
+
+  const handleCall = () => {
+    window.location.href = `tel:${phone}`
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 py-12">
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Back Button */}
+        <Link
+          to="/products"
+          className="inline-flex items-center text-indigo-600 hover:text-indigo-800 mb-8 transition-colors hover:gap-2 gap-1"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Products
+        </Link>
+
+        <div className="grid md:grid-cols-2 gap-12 items-start">
+          {/* Image */}
+          <div className="animate-fade-in">
+            <div className="aspect-square bg-white rounded-3xl shadow-2xl overflow-hidden hover:shadow-3xl transition-all duration-300">
+              {product.image_url ? (
+                <img
+                  src={getImageUrl(product.image_url)}
+                  alt={product.product_name}
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                  <Package className="h-32 w-32 text-gray-300" />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Details */}
+          <div className="space-y-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
+            {/* Category Badge */}
+            <div className="inline-flex">
+              <span className="px-4 py-2 bg-gradient-to-r from-indigo-100 to-purple-100 text-indigo-700 text-sm font-semibold rounded-full">
+                {product.categories?.category_name}
+              </span>
+            </div>
+
+            {/* Title */}
+            <div>
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-2 leading-tight">
+                {product.product_name}
+              </h1>
+              <p className="text-gray-500 text-base">
+                Product Code: <span className="font-mono font-semibold text-gray-700">{product.product_code}</span>
+              </p>
+            </div>
+
+            {/* Price */}
+            <div className="bg-gradient-to-r from-orange-100 to-pink-100 rounded-2xl p-6">
+              <p className="text-gray-600 text-sm mb-1">Price</p>
+              <div className="flex items-center gap-2">
+                <IndianRupee className="h-10 w-10 text-orange-600" />
+                <span className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-pink-600">
+                  {product.price}
+                </span>
+              </div>
+            </div>
+
+            {/* Stock Status */}
+            <div
+              className={`px-6 py-4 rounded-2xl font-semibold text-sm ${
+                product.stock > 0
+                  ? 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-700'
+                  : 'bg-gradient-to-r from-red-100 to-pink-100 text-red-700'
+              }`}
+            >
+              {product.stock > 0
+                ? `✓ In Stock — ${product.stock} units available`
+                : '✗ Out of Stock'}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="space-y-3 pt-4">
+              {/* Add to Cart */}
+              <button
+                onClick={handleAddToCart}
+                disabled={product.stock === 0}
+                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 transform hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2 text-lg"
+              >
+                <ShoppingCart className="h-6 w-6" />
+                Add to Cart
+              </button>
+
+              {/* Contact Options */}
+              <div className="grid grid-cols-2 gap-3">
+                {/* WhatsApp */}
+                <button
+                  onClick={handleWhatsApp}
+                  className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 transform hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                >
+                  <MessageCircle className="h-5 w-5" />
+                  <span className="hidden sm:inline">WhatsApp</span>
+                </button>
+
+                {/* Call */}
+                <button
+                  onClick={handleCall}
+                  className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-bold py-4 px-4 rounded-xl transition-all duration-200 transform hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                >
+                  <Phone className="h-5 w-5" />
+                  <span className="hidden sm:inline">Call</span>
+                </button>
+              </div>
+
+              {/* View Cart */}
+              <button
+                onClick={() => navigate('/cart')}
+                className="w-full border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 font-bold py-3 px-6 rounded-xl transition-all duration-200"
+              >
+                View Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-fade-in {
+          animation: fade-in 0.5s ease-out forwards;
+        }
+      `}</style>
+    </div>
+  )
+}
+
+export default ProductDetail
