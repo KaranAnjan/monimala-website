@@ -74,9 +74,9 @@ const Cart = () => {
         {/* Back Button */}
         <Link
           to="/products"
-          className="inline-flex items-center text-indigo-600 hover:text-indigo-800 mb-8 gap-1"
+          className="inline-flex items-center text-indigo-600 hover:text-indigo-800 hover:translate-x-1 mb-8 gap-1 transition-all duration-300 group"
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
           Back to Shop
         </Link>
 
@@ -124,22 +124,22 @@ const Cart = () => {
                   <div className="flex flex-col items-end justify-between">
                     <button
                       onClick={() => removeFromCart(item.id)}
-                      className="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-lg transition-colors"
+                      className="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-lg transition-all duration-200 transform hover:scale-125 active:scale-95"
                     >
                       <Trash2 className="h-5 w-5" />
                     </button>
 
-                    <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-2">
+                    <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-2 border-2 border-gray-200 hover:border-purple-300 transition-colors duration-300">
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="p-1 hover:bg-gray-200 rounded"
+                        className="p-1 hover:bg-gray-200 rounded transition-all duration-200 transform hover:scale-110 active:scale-90"
                       >
                         <Minus className="h-4 w-4" />
                       </button>
                       <span className="w-8 text-center font-semibold">{item.quantity}</span>
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="p-1 hover:bg-gray-200 rounded"
+                        className="p-1 hover:bg-gray-200 rounded transition-all duration-200 transform hover:scale-110 active:scale-90"
                       >
                         <Plus className="h-4 w-4" />
                       </button>
@@ -180,16 +180,16 @@ const Cart = () => {
                 {/* WhatsApp Order */}
                 <button
                   onClick={handleWhatsAppOrder}
-                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 transform hover:shadow-lg hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 hover:shadow-lg hover:-translate-y-1 flex items-center justify-center gap-2 group"
                 >
-                  <MessageCircle className="h-5 w-5" />
+                  <MessageCircle className="h-5 w-5 group-hover:scale-125 transition-transform" />
                   Order via WhatsApp
                 </button>
 
                 {/* Payment Button */}
                 <button
                   onClick={handlePayment}
-                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 transform hover:shadow-lg hover:-translate-y-0.5"
+                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 hover:shadow-lg hover:-translate-y-1"
                 >
                   Proceed to Payment
                 </button>
@@ -197,7 +197,7 @@ const Cart = () => {
                 {/* Continue Shopping */}
                 <button
                   onClick={() => navigate('/products')}
-                  className="w-full border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 font-bold py-3 px-6 rounded-xl transition-all duration-200"
+                  className="w-full border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95"
                 >
                   Continue Shopping
                 </button>
@@ -208,7 +208,7 @@ const Cart = () => {
                     clearCart()
                     toast.success('Cart cleared!')
                   }}
-                  className="w-full text-red-600 hover:text-red-800 text-sm font-medium py-2"
+                  className="w-full text-red-600 hover:text-red-800 hover:bg-red-50 text-sm font-medium py-2 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95"
                 >
                   Clear Cart
                 </button>

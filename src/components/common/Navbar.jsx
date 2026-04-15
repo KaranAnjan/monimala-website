@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { ShoppingCart, Menu, X } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
 import { useState } from 'react'
@@ -7,31 +7,48 @@ import logo from '../../assets/logo.png'
 const Navbar = () => {
   const { cart } = useCart()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const location = useLocation()
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
+
+  const isActive = (path) => location.pathname === path
 
   return (
     <nav className="bg-white shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between items-center h-20">
           {/* Logo and Brand */}
-          <Link to="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity flex-shrink-0">
+          <Link to="/" className="flex items-center gap-2 md:gap-3 hover:opacity-90 transition-all duration-300 flex-shrink-0 group">
             <img 
               src={logo}
               alt="Monimala Logo" 
-              className="h-14 w-14 object-contain"
+              className="h-12 md:h-14 w-12 md:w-14 object-contain group-hover:scale-110 transition-transform duration-300"
             />
-            <div className="hidden sm:block">
-              <h1 className="text-2xl font-bold text-purple-700">Monimala</h1>
-              <p className="text-sm text-gray-500">Fashion Jewellery</p>
+            <div className="block">
+              <h1 className="text-xs md:text-2xl font-bold text-purple-700 group-hover:text-purple-600 transition-colors duration-300 leading-tight">Monimala</h1>
+              <p className="text-[10px] md:text-sm text-gray-500 leading-tight">Fashion Jewellery</p>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
-            <Link to="/" className="text-gray-700 hover:text-purple-600 font-semibold text-lg">
+          <div className="hidden md:flex items-center gap-4">
+            <Link 
+              to="/" 
+              className={`px-4 py-2 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 ${
+                isActive('/') 
+                  ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg scale-105' 
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
               Home
             </Link>
-            <Link to="/products" className="text-gray-700 hover:text-purple-600 font-semibold text-lg">
+            <Link 
+              to="/products" 
+              className={`px-4 py-2 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 ${
+                isActive('/products') 
+                  ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg scale-105' 
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
               Products
             </Link>
           </div>
@@ -39,10 +56,10 @@ const Navbar = () => {
           {/* Right Actions */}
           <div className="flex items-center gap-6">
             {/* Cart Icon */}
-            <Link to="/cart" className="relative text-gray-700 hover:text-purple-600 hidden sm:block">
-              <ShoppingCart className="h-7 w-7" />
+            <Link to="/cart" className="relative text-gray-700 hover:text-purple-600 hidden sm:block group transition-all duration-300">
+              <ShoppingCart className="h-7 w-7 group-hover:scale-125 transition-transform duration-300" />
               {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center">
+                <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center animate-pulse">
                   {cartCount}
                 </span>
               )}
@@ -51,7 +68,11 @@ const Navbar = () => {
             {/* Admin Button */}
             <Link
               to="/admin"
-              className="hidden md:block bg-purple-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-purple-700 transition-colors text-lg"
+              className={`hidden md:block px-5 py-2 rounded-lg font-semibold transition-all duration-300 text-lg transform hover:scale-105 ${
+                isActive('/admin')
+                  ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg scale-105'
+                  : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+              }`}
             >
               Admin
             </Link>
@@ -69,13 +90,51 @@ const Navbar = () => {
         {/* Mobile Menu */}
         {mobileMenuOpen && (
           <div className="md:hidden border-t bg-white pb-4">
-            <Link to="/" className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded font-medium text-lg">Home</Link>
-            <Link to="/products" className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded font-medium text-lg">Products</Link>
-            <Link to="/cart" className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded flex items-center gap-2 font-medium text-lg">
+            <Link 
+              to="/" 
+              className={`block px-4 py-3 rounded font-medium text-lg transition-all duration-300 margin-2 ${
+                isActive('/') 
+                  ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg mx-3 rounded-lg' 
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Home
+            </Link>
+            <Link 
+              to="/products" 
+              className={`block px-4 py-3 rounded font-medium text-lg transition-all duration-300 margin-2 ${
+                isActive('/products') 
+                  ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg mx-3 rounded-lg' 
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Products
+            </Link>
+            <Link 
+              to="/cart" 
+              className={`block px-4 py-3 rounded font-medium text-lg transition-all duration-300 flex items-center gap-2 margin-2 ${
+                isActive('/cart') 
+                  ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg mx-3 rounded-lg' 
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
               <ShoppingCart className="h-5 w-5" />
               Cart {cartCount > 0 && `(${cartCount})`}
             </Link>
-            <Link to="/admin" className="block px-4 py-3 text-gray-700 hover:bg-gray-100 rounded font-medium text-lg">Admin</Link>
+            <Link 
+              to="/admin" 
+              className={`block px-4 py-3 rounded font-medium text-lg transition-all duration-300 margin-2 ${
+                isActive('/admin') 
+                  ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg mx-3 rounded-lg' 
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Admin
+            </Link>
           </div>
         )}
       </div>

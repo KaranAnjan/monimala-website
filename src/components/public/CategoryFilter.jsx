@@ -3,10 +3,10 @@ const CategoryFilter = ({ categories, selected, onSelect }) => {
     <div className="flex flex-wrap gap-3 mb-8">
       <button
         onClick={() => onSelect(null)}
-        className={`px-4 py-2 rounded-full font-medium transition ${
+        className={`px-4 py-2 rounded-full font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 ${
           selected === null
-            ? 'bg-indigo-600 text-white'
-            : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg scale-105 animate-pulse'
+            : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:shadow-md'
         }`}
       >
         All
@@ -15,10 +15,10 @@ const CategoryFilter = ({ categories, selected, onSelect }) => {
         <button
           key={cat.id}
           onClick={() => onSelect(cat.id)}
-          className={`px-4 py-2 rounded-full font-medium transition ${
+          className={`px-4 py-2 rounded-full font-medium transition-all duration-300 transform hover:scale-105 active:scale-95 ${
             selected === cat.id
-              ? 'bg-indigo-600 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg scale-105 animate-pulse'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300 hover:shadow-md'
           }`}
         >
           {cat.category_name}

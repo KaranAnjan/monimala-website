@@ -19,17 +19,17 @@ const Products = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">All Products</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-6 animate-fade-in">All Products</h1>
 
       {/* Search */}
-      <div className="relative mb-6">
+      <div className="relative mb-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
         <input
           type="text"
           placeholder="Search products by name or code..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300 hover:border-purple-300 hover:shadow-md"
         />
       </div>
 

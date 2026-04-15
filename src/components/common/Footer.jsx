@@ -19,17 +19,17 @@ const Footer = () => {
           <div>
             <h3 className="text-2xl font-bold mb-6">Contact Us</h3>
             <div className="space-y-4 text-purple-100">
-              <div className="flex items-center gap-3">
-                <Phone className="h-6 w-6 text-yellow-300" />
-                <span className="text-lg">+91 7407437378</span>
+              <div className="flex items-center gap-3 hover:translate-x-1 transition-transform duration-300 cursor-pointer group">
+                <Phone className="h-6 w-6 text-yellow-300 group-hover:scale-125 transition-transform" />
+                <span className="text-lg group-hover:text-yellow-300 transition-colors">+91 7407437378</span>
               </div>
-              <div className="flex items-center gap-3">
-                <Mail className="h-6 w-6 text-yellow-300" />
-                <span className="text-lg">info@monimala.com</span>
+              <div className="flex items-center gap-3 hover:translate-x-1 transition-transform duration-300 cursor-pointer group">
+                <Mail className="h-6 w-6 text-yellow-300 group-hover:scale-125 transition-transform" />
+                <span className="text-lg group-hover:text-yellow-300 transition-colors">info@monimala.com</span>
               </div>
-              <div className="flex items-center gap-3">
-                <MapPin className="h-6 w-6 text-yellow-300" />
-                <span className="text-lg">India</span>
+              <div className="flex items-center gap-3 hover:translate-x-1 transition-transform duration-300 cursor-pointer group">
+                <MapPin className="h-6 w-6 text-yellow-300 group-hover:scale-125 transition-transform" />
+                <span className="text-lg group-hover:text-yellow-300 transition-colors">India</span>
               </div>
             </div>
           </div>
@@ -38,10 +38,10 @@ const Footer = () => {
           <div>
             <h3 className="text-2xl font-bold mb-6">Categories</h3>
             <ul className="space-y-3 text-purple-100">
-              <li className="hover:text-yellow-300 transition cursor-pointer text-lg">💎 Fashion Jewellery</li>
-              <li className="hover:text-yellow-300 transition cursor-pointer text-lg">🎁 Gift Collections</li>
-              <li className="hover:text-yellow-300 transition cursor-pointer text-lg">💄 Cosmetics & Beauty</li>
-              <li className="hover:text-yellow-300 transition cursor-pointer text-lg">✨ Special Occasions</li>
+              <li className="hover:text-yellow-300 hover:translate-x-1 transition-all duration-300 cursor-pointer text-lg transform">💎 Fashion Jewellery</li>
+              <li className="hover:text-yellow-300 hover:translate-x-1 transition-all duration-300 cursor-pointer text-lg transform">🎁 Gift Collections</li>
+              <li className="hover:text-yellow-300 hover:translate-x-1 transition-all duration-300 cursor-pointer text-lg transform">💄 Cosmetics & Beauty</li>
+              <li className="hover:text-yellow-300 hover:translate-x-1 transition-all duration-300 cursor-pointer text-lg transform">✨ Special Occasions</li>
             </ul>
           </div>
 
@@ -49,14 +49,14 @@ const Footer = () => {
           <div>
             <h3 className="text-2xl font-bold mb-6">Follow Us</h3>
             <div className="flex gap-6 mb-6">
-              <a href="#" className="bg-purple-500 hover:bg-yellow-300 p-4 rounded-full transition duration-300">
-                <Facebook className="h-6 w-6 text-white" />
+              <a href="#" className="bg-purple-500 hover:bg-yellow-300 p-4 rounded-full transition-all duration-300 transform hover:scale-125 hover:-translate-y-1 group">
+                <Facebook className="h-6 w-6 text-white group-hover:text-purple-600" />
               </a>
-              <a href="#" className="bg-purple-500 hover:bg-yellow-300 p-4 rounded-full transition duration-300">
-                <Instagram className="h-6 w-6 text-white" />
+              <a href="#" className="bg-purple-500 hover:bg-yellow-300 p-4 rounded-full transition-all duration-300 transform hover:scale-125 hover:-translate-y-1 group">
+                <Instagram className="h-6 w-6 text-white group-hover:text-purple-600" />
               </a>
-              <a href="#" className="bg-purple-500 hover:bg-yellow-300 p-4 rounded-full transition duration-300">
-                <Twitter className="h-6 w-6 text-white" />
+              <a href="#" className="bg-purple-500 hover:bg-yellow-300 p-4 rounded-full transition-all duration-300 transform hover:scale-125 hover:-translate-y-1 group">
+                <Twitter className="h-6 w-6 text-white group-hover:text-purple-600" />
               </a>
             </div>
             <p className="text-purple-200 text-base">Connect with us on social media</p>

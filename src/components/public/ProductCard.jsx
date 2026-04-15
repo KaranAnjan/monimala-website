@@ -37,7 +37,7 @@ const ProductCard = ({ product }) => {
 
   return (
     <Link to={`/products/${product.id}`} className="group">
-      <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 flex flex-col h-full border border-gray-100">
+      <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-2 flex flex-col h-full border border-gray-100 group">
         {/* Image Container */}
         <div className="relative h-72 overflow-hidden bg-gray-100">
           {imageUrl ? (
@@ -76,7 +76,7 @@ const ProductCard = ({ product }) => {
           </p>
 
           {/* Product Name */}
-          <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-purple-600 transition-colors">
+          <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-purple-600 transition-all duration-300 group-hover:-translate-x-0.5">
             {product.product_name}
           </h3>
 
@@ -99,30 +99,30 @@ const ProductCard = ({ product }) => {
             <button
               onClick={handleAddToCart}
               disabled={!inStock}
-              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg text-lg transition-all flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg text-base transition-all flex items-center justify-center gap-2 overflow-hidden"
             >
-              <ShoppingCart className="h-6 w-6" />
-              Add to Cart
+              <ShoppingCart className="h-5 w-5 flex-shrink-0" />
+              <span className="truncate">Add to Cart</span>
             </button>
 
             {/* Contact Options */}
-            <div className="flex gap-3">
+            <div className="grid grid-cols-2 gap-3">
               {/* WhatsApp */}
               <button
                 onClick={handleWhatsApp}
-                className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-3 rounded-lg text-base transition-all flex items-center justify-center gap-2"
+                className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-2 rounded-lg text-sm md:text-base transition-all flex items-center justify-center gap-1 overflow-hidden"
               >
-                <MessageCircle className="h-5 w-5" />
-                WhatsApp
+                <MessageCircle className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
+                <span className="truncate">Chat</span>
               </button>
 
               {/* Call */}
               <a
                 href={`tel:${phone}`}
-                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-3 rounded-lg text-base transition-all flex items-center justify-center gap-2"
+                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-2 rounded-lg text-sm md:text-base transition-all flex items-center justify-center gap-1 overflow-hidden"
               >
-                <Phone className="h-5 w-5" />
-                Call
+                <Phone className="h-4 w-4 md:h-5 md:w-5 flex-shrink-0" />
+                <span className="truncate">Call</span>
               </a>
             </div>
           </div>

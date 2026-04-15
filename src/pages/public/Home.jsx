@@ -15,43 +15,60 @@ const Home = () => {
     : products.slice(0, 8)
 
   return (
-    <div className="bg-gradient-to-br from-purple-50 via-white to-pink-50 min-h-screen">
+    <div className="bg-white min-h-screen">
       {/* Hero Section */}
       <HeroSection />
 
-      {/* Featured Products */}
+      {/* Featured Products with Categories Sidebar */}
       <section className="max-w-7xl mx-auto px-4 py-20">
-        <div className="mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">Featured Products</h2>
-          <p className="text-xl text-gray-600">Discover our latest collections</p>
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Categories Sidebar - Left */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-24">
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">Shop by Category</h3>
+              <div className="space-y-3">
+                {/* All Products Button */}
+                <button
+                  onClick={() => setSelectedCategory(null)}
+                  className={`w-full p-4 rounded-lg text-left font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 ${
+                    selectedCategory === null
+                      ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg scale-105 animate-pulse'
+                      : 'bg-white border-2 border-gray-200 text-gray-900 hover:border-purple-300 hover:shadow-md'
+                  }`}
+                >
+                  ✨ All Products
+                </button>
 
-        {loading ? (
-          <Loading />
-        ) : (
-          <ProductGrid products={filteredProducts} />
-        )}
-      </section>
+                {/* Category Buttons */}
+                {categories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)}
+                    className={`w-full p-4 rounded-lg text-left font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 ${
+                      selectedCategory === cat.id
+                        ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg scale-105 animate-pulse'
+                        : 'bg-white border-2 border-gray-200 text-gray-900 hover:border-purple-300 hover:shadow-md'
+                    }`}
+                  >
+                    {cat.category === 'jewellery' ? '💎' : cat.category === 'gifts' ? '🎁' : '💄'} {cat.category_name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
 
-      {/* Categories Section */}
-      <section className="bg-white py-20">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-12">Shop by Category</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)}
-                className={`p-8 rounded-xl text-center font-bold text-2xl transition-all duration-300 transform hover:shadow-xl hover:-translate-y-1 ${
-                  selectedCategory === cat.id
-                    ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg'
-                    : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
-                }`}
-              >
-                {cat.category === 'jewellery' ? '💎' : cat.category === 'gifts' ? '🎁' : '💄'}{' '}
-                {cat.category_name}
-              </button>
-            ))}
+          {/* Featured Products - Right */}
+          <div className="lg:col-span-3">
+            <div className="mb-8">
+              <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">Featured Products</h2>
+              <p className="text-xl text-gray-600">Discover our latest collections</p>
+            </div>
+
+            {loading ? (
+              <Loading />
+            ) : (
+              <ProductGrid products={filteredProducts} />
+            )}
           </div>
         </div>
       </section>
@@ -65,10 +82,10 @@ const Home = () => {
             { icon: '🚚', title: 'Fast Delivery', desc: 'Quick and reliable shipping nationwide' },
             { icon: '🛡️', title: 'Authentic Products', desc: '100% genuine items guaranteed' }
           ].map((item, i) => (
-            <div key={i} className="bg-white p-10 rounded-xl shadow-lg hover:shadow-2xl transition-shadow text-center border border-gray-100">
-              <div className="text-8xl mb-6">{item.icon}</div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">{item.title}</h3>
-              <p className="text-lg text-gray-600">{item.desc}</p>
+            <div key={i} className="bg-white p-10 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 text-center border border-gray-100 transform hover:scale-105 hover:-translate-y-2 group cursor-pointer">
+              <div className="text-8xl mb-6 group-hover:scale-125 transition-transform duration-300 inline-block">{item.icon}</div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-purple-600 transition-colors">{item.title}</h3>
+              <p className="text-lg text-gray-600 group-hover:text-gray-800 transition-colors">{item.desc}</p>
             </div>
           ))}
         </div>
