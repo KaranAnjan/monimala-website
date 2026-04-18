@@ -69,7 +69,7 @@ const Cart = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 py-8 md:py-12">
       <div className="max-w-7xl mx-auto px-4">
         {/* Back Button */}
         <Link
@@ -80,19 +80,19 @@ const Cart = () => {
           Back to Shop
         </Link>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2">
-            <h1 className="text-4xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
+            <h1 className="text-2xl md:text-4xl font-bold text-gray-900 mb-6 md:mb-8">Shopping Cart</h1>
 
             <div className="space-y-4">
               {cart.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow p-6 flex gap-6 animate-fade-in"
+                  className="bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow p-4 md:p-6 flex flex-col md:flex-row gap-4 md:gap-6 animate-fade-in"
                 >
                   {/* Image */}
-                  <div className="w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
+                  <div className="w-20 h-20 md:w-24 md:h-24 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
                     {item.image_url ? (
                       <img
                         src={getImageUrl(item.image_url)}
@@ -107,21 +107,21 @@ const Cart = () => {
                   </div>
 
                   {/* Details */}
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900 text-lg">{item.product_name}</h3>
-                    <p className="text-sm text-gray-500">Code: {item.product_code}</p>
-                    <div className="mt-3 flex items-center gap-3">
-                      <span className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-pink-600">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-900 text-base md:text-lg line-clamp-2">{item.product_name}</h3>
+                    <p className="text-xs md:text-sm text-gray-500">Code: {item.product_code}</p>
+                    <div className="mt-2 md:mt-3 flex flex-col md:flex-row md:items-center md:gap-3 gap-1">
+                      <span className="text-xl md:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
                         ₹{item.price}
                       </span>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-xs md:text-sm text-gray-500">
                         Subtotal: ₹{item.price * item.quantity}
                       </span>
                     </div>
                   </div>
 
                   {/* Quantity & Actions */}
-                  <div className="flex flex-col items-end justify-between">
+                  <div className="flex items-center justify-between md:flex-col md:items-end md:justify-between gap-2">
                     <button
                       onClick={() => removeFromCart(item.id)}
                       className="text-red-600 hover:text-red-800 hover:bg-red-50 p-2 rounded-lg transition-all duration-200 transform hover:scale-125 active:scale-95"
@@ -129,19 +129,19 @@ const Cart = () => {
                       <Trash2 className="h-5 w-5" />
                     </button>
 
-                    <div className="flex items-center gap-2 bg-gray-100 rounded-lg p-2 border-2 border-gray-200 hover:border-purple-300 transition-colors duration-300">
+                    <div className="flex items-center gap-1 md:gap-2 bg-gray-100 rounded-lg p-1.5 md:p-2 border-2 border-gray-200 hover:border-purple-300 transition-colors duration-300">
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
                         className="p-1 hover:bg-gray-200 rounded transition-all duration-200 transform hover:scale-110 active:scale-90"
                       >
-                        <Minus className="h-4 w-4" />
+                        <Minus className="h-3 w-3 md:h-4 md:w-4" />
                       </button>
-                      <span className="w-8 text-center font-semibold">{item.quantity}</span>
+                      <span className="w-6 md:w-8 text-center font-semibold text-sm">{item.quantity}</span>
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
                         className="p-1 hover:bg-gray-200 rounded transition-all duration-200 transform hover:scale-110 active:scale-90"
                       >
-                        <Plus className="h-4 w-4" />
+                        <Plus className="h-3 w-3 md:h-4 md:w-4" />
                       </button>
                     </div>
                   </div>
@@ -152,8 +152,8 @@ const Cart = () => {
 
           {/* Order Summary & Checkout */}
           <div>
-            <div className="bg-white rounded-2xl shadow-lg p-8 sticky top-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Order Summary</h2>
+            <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 lg:sticky lg:top-8">
+              <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-6">Order Summary</h2>
 
               {/* Items Summary */}
               <div className="space-y-3 mb-6 pb-6 border-b border-gray-200">
@@ -168,9 +168,9 @@ const Cart = () => {
               </div>
 
               {/* Total */}
-              <div className="bg-gradient-to-r from-orange-100 to-pink-100 rounded-xl p-4 mb-6">
-                <p className="text-gray-600 text-sm mb-1">Total Amount</p>
-                <p className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-pink-600">
+              <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl p-3 md:p-4 mb-6">
+                <p className="text-gray-600 text-xs md:text-sm mb-1">Total Amount</p>
+                <p className="text-2xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
                   ₹{total}
                 </p>
               </div>
@@ -180,16 +180,16 @@ const Cart = () => {
                 {/* WhatsApp Order */}
                 <button
                   onClick={handleWhatsAppOrder}
-                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 hover:shadow-lg hover:-translate-y-1 flex items-center justify-center gap-2 group"
+                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-3 md:py-4 px-4 md:px-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 hover:shadow-lg hover:-translate-y-1 flex items-center justify-center gap-2 text-sm md:text-base group"
                 >
-                  <MessageCircle className="h-5 w-5 group-hover:scale-125 transition-transform" />
+                  <MessageCircle className="h-4 w-4 md:h-5 md:w-5 group-hover:scale-125 transition-transform flex-shrink-0" />
                   Order via WhatsApp
                 </button>
 
                 {/* Payment Button */}
                 <button
                   onClick={handlePayment}
-                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 hover:shadow-lg hover:-translate-y-1"
+                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-3 md:py-4 px-4 md:px-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 hover:shadow-lg hover:-translate-y-1 text-sm md:text-base"
                 >
                   Proceed to Payment
                 </button>
@@ -197,7 +197,7 @@ const Cart = () => {
                 {/* Continue Shopping */}
                 <button
                   onClick={() => navigate('/products')}
-                  className="w-full border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 font-bold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95"
+                  className="w-full border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 font-bold py-2 md:py-3 px-4 md:px-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 text-sm md:text-base"
                 >
                   Continue Shopping
                 </button>
@@ -208,7 +208,7 @@ const Cart = () => {
                     clearCart()
                     toast.success('Cart cleared!')
                   }}
-                  className="w-full text-red-600 hover:text-red-800 hover:bg-red-50 text-sm font-medium py-2 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95"
+                  className="w-full text-red-600 hover:text-red-800 hover:bg-red-50 text-xs md:text-sm font-medium py-2 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95"
                 >
                   Clear Cart
                 </button>

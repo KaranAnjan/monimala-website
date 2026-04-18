@@ -88,8 +88,8 @@ const Navbar = () => {
 
           {/* Right Actions */}
           <div className="flex items-center gap-6">
-            {/* Cart Icon */}
-            <Link to="/cart" className="relative text-gray-700 hover:text-purple-600 hidden sm:block group transition-all duration-300">
+            {/* Cart Icon - Show on small screens too */}
+            <Link to="/cart" className="relative text-gray-700 hover:text-purple-600 group transition-all duration-300">
               <ShoppingCart className="h-7 w-7 group-hover:scale-125 transition-transform duration-300" />
               {cartCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full h-6 w-6 flex items-center justify-center animate-pulse">
@@ -147,6 +147,20 @@ const Navbar = () => {
             >
               Products
             </Link>
+
+            {/* Mobile Products Submenu */}
+            <div className="pl-4 space-y-2 bg-gray-50 border-l-2 border-purple-300">
+              {categories.map((cat) => (
+                <Link
+                  key={cat.slug}
+                  to={`/products?category=${cat.slug}`}
+                  className="block px-4 py-2 text-sm rounded font-medium text-gray-700 hover:bg-purple-100 hover:text-purple-600 transition-all duration-200"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {cat.name}
+                </Link>
+              ))}
+            </div>
             <Link 
               to="/cart" 
               className={`block px-4 py-3 rounded font-medium text-lg transition-all duration-300 flex items-center gap-2 margin-2 ${

@@ -1,10 +1,11 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { ShoppingCart, MessageCircle, Phone } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
 import { getImageUrl } from '../../lib/supabaseClient'
 import toast from 'react-hot-toast'
 
 const ProductCard = ({ product }) => {
+  const navigate = useNavigate()
   const { addToCart } = useCart()
   const inStock = product.stock > 0
   const phone = import.meta.env.VITE_PHONE || '+917407437378'
@@ -15,7 +16,20 @@ const ProductCard = ({ product }) => {
   const handleAddToCart = (e) => {
     e.preventDefault()
     addToCart(product)
-    toast.success('Added to cart!', { icon: '🛒' })
+    toast.success((t) => (
+      <div className="flex items-center justify-between gap-3 w-full">
+        <span>Added to cart! 🛒</span>
+        <button
+          onClick={() => {
+            navigate('/cart')
+            toast.dismiss(t.id)
+          }}
+          className="bg-white text-purple-600 font-bold px-3 py-1 rounded-lg hover:bg-purple-50 transition-all text-sm"
+        >
+          View Cart
+        </button>
+      </div>
+    ))
   }
 
   const handleWhatsApp = (e) => {
