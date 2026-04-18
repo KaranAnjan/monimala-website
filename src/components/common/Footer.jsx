@@ -1,6 +1,14 @@
 import { Mail, Phone, MapPin, Facebook, Instagram, Twitter } from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 const Footer = () => {
+  const categories = [
+    { name: '💎 Fashion Jewellery', slug: 'jwellery' },
+    { name: '🎁 Gift Collections', slug: 'gifts' },
+    { name: '💄 Cosmetics & Beauty', slug: 'cosmetics' },
+    { name: '✨ Special Occasions', slug: 'special-occasions' },
+  ]
+
   return (
     <footer className="bg-gradient-to-r from-purple-700 via-purple-600 to-purple-800 text-white pt-20 pb-10 mt-20">
       {/* Main Footer Content */}
@@ -38,10 +46,16 @@ const Footer = () => {
           <div>
             <h3 className="text-2xl font-bold mb-6">Categories</h3>
             <ul className="space-y-3 text-purple-100">
-              <li className="hover:text-yellow-300 hover:translate-x-1 transition-all duration-300 cursor-pointer text-lg transform">💎 Fashion Jewellery</li>
-              <li className="hover:text-yellow-300 hover:translate-x-1 transition-all duration-300 cursor-pointer text-lg transform">🎁 Gift Collections</li>
-              <li className="hover:text-yellow-300 hover:translate-x-1 transition-all duration-300 cursor-pointer text-lg transform">💄 Cosmetics & Beauty</li>
-              <li className="hover:text-yellow-300 hover:translate-x-1 transition-all duration-300 cursor-pointer text-lg transform">✨ Special Occasions</li>
+              {categories.map((cat) => (
+                <li key={cat.slug}>
+                  <Link
+                    to={`/products?category=${cat.slug}`}
+                    className="hover:text-yellow-300 hover:translate-x-1 transition-all duration-300 text-lg transform inline-block"
+                  >
+                    {cat.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
 

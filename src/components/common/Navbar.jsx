@@ -1,14 +1,24 @@
 import { Link, useLocation } from 'react-router-dom'
-import { ShoppingCart, Menu, X } from 'lucide-react'
+import { ShoppingCart, Menu, X, ChevronDown } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
+import { useAuth } from '../../context/AuthContext'
 import { useState } from 'react'
 import logo from '../../assets/logo.png'
 
 const Navbar = () => {
   const { cart } = useCart()
+  const { isAdmin } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [productsDropdownOpen, setProductsDropdownOpen] = useState(false)
   const location = useLocation()
   const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0)
+
+  const categories = [
+    { name: '💎 Fashion Jewellery', slug: 'jwellery' },
+    { name: '🎁 Gift Collections', slug: 'gifts' },
+    { name: '💄 Cosmetics & Beauty', slug: 'cosmetics' },
+    { name: '✨ Special Occasions', slug: 'special-occasions' },
+  ]
 
   const isActive = (path) => location.pathname === path
 
@@ -41,16 +51,39 @@ const Navbar = () => {
             >
               Home
             </Link>
-            <Link 
-              to="/products" 
-              className={`px-4 py-2 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 ${
-                isActive('/products') 
-                  ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg scale-105' 
-                  : 'text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              Products
-            </Link>
+            
+            {/* Products Dropdown */}
+            <div className="relative group">
+              <button
+                className={`px-4 py-2 rounded-lg font-semibold text-lg transition-all duration-300 transform hover:scale-105 flex items-center gap-2 ${
+                  isActive('/products') 
+                    ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg scale-105' 
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                Products
+                <ChevronDown className="h-4 w-4 group-hover:rotate-180 transition-transform" />
+              </button>
+              
+              {/* Dropdown Menu */}
+              <div className="absolute left-0 mt-0 w-56 bg-white rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-40">
+                <Link
+                  to="/products"
+                  className="block px-4 py-3 text-gray-700 hover:bg-purple-50 font-medium first:rounded-t-lg border-b border-gray-100"
+                >
+                  All Products
+                </Link>
+                {categories.map((cat) => (
+                  <Link
+                    key={cat.slug}
+                    to={`/products?category=${cat.slug}`}
+                    className="block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-all duration-200 border-b border-gray-100 last:border-b-0 last:rounded-b-lg"
+                  >
+                    {cat.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Right Actions */}
@@ -65,17 +98,19 @@ const Navbar = () => {
               )}
             </Link>
 
-            {/* Admin Button */}
-            <Link
-              to="/admin"
-              className={`hidden md:block px-5 py-2 rounded-lg font-semibold transition-all duration-300 text-lg transform hover:scale-105 ${
-                isActive('/admin')
-                  ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg scale-105'
-                  : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
-              }`}
-            >
-              Admin
-            </Link>
+            {/* Admin Button - Only visible to admin users */}
+            {isAdmin && (
+              <Link
+                to="/admin"
+                className={`hidden md:block px-5 py-2 rounded-lg font-semibold transition-all duration-300 text-lg transform hover:scale-105 ${
+                  isActive('/admin')
+                    ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg scale-105'
+                    : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
+                }`}
+              >
+                Admin
+              </Link>
+            )}
 
             {/* Mobile Menu Button */}
             <button
@@ -132,6 +167,7 @@ const Navbar = () => {
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
               onClick={() => setMobileMenuOpen(false)}
+              style={{ display: isAdmin ? 'block' : 'none' }}
             >
               Admin
             </Link>

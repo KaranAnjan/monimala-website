@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useProducts } from '../../hooks/useProducts'
 import { useCategories } from '../../hooks/useCategories'
 import CategoryFilter from '../../components/public/CategoryFilter'
@@ -7,10 +8,39 @@ import Loading from '../../components/common/Loading'
 import { Search } from 'lucide-react'
 
 const Products = () => {
+  const [searchParams] = useSearchParams()
   const [selectedCategory, setSelectedCategory] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
   const { products, loading } = useProducts(selectedCategory)
   const { categories } = useCategories()
+
+  // Set selectedCategory from URL parameter on mount and scroll to top
+  useEffect(() => {
+    const categoryParam = searchParams.get('category')
+    if (categoryParam) {
+      // Mapping of URL slugs to database category names
+      const categoryMap = {
+        'jwellery': 'Jewellery',
+        'gifts': 'Gifts',
+        'cosmetics': 'Cosmetics',
+        'special-occasions': 'Special Occasions',
+      }
+      
+      // Find the category ID that matches
+      const categoryName = categoryMap[categoryParam]
+      if (categoryName) {
+        const matched = categories.find(cat => 
+          cat.category_name.toLowerCase() === categoryName.toLowerCase()
+        )
+        if (matched) {
+          setSelectedCategory(matched.id)
+        }
+      }
+    }
+    
+    // Scroll to top of page
+    window.scrollTo(0, 0)
+  }, [searchParams, categories])
 
   const filteredProducts = products.filter((p) =>
     p.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||

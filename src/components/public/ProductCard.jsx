@@ -35,6 +35,13 @@ const ProductCard = ({ product }) => {
 
   const tag = categoryTag[product.categories?.category_name?.toLowerCase()] || { label: 'Product', bg: 'bg-gray-500' }
 
+  // Get stock display text
+  const getStockDisplay = () => {
+    if (product.stock === 0) return 'Out of Stock'
+    if (product.stock <= 3) return `${product.stock} available`
+    return 'Available'
+  }
+
   return (
     <Link to={`/products/${product.id}`} className="group">
       <div className="bg-white rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:scale-105 hover:-translate-y-2 flex flex-col h-full border border-gray-100 group">
@@ -70,11 +77,6 @@ const ProductCard = ({ product }) => {
 
         {/* Content */}
         <div className="p-5 flex flex-col flex-1">
-          {/* Category Name */}
-          <p className="text-sm text-purple-600 font-bold mb-2">
-            {product.categories?.category_name}
-          </p>
-
           {/* Product Name */}
           <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-purple-600 transition-all duration-300 group-hover:-translate-x-0.5">
             {product.product_name}
@@ -85,12 +87,23 @@ const ProductCard = ({ product }) => {
 
           {/* Price */}
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-3xl font-bold text-orange-600">₹{product.price}</span>
+            {product.price && product.mrp ? (
+              <>
+                <span className="text-sm text-gray-500 line-through">₹{product.mrp}</span>
+                <span className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">₹{product.price}</span>
+              </>
+            ) : product.mrp ? (
+              <span className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">₹{product.mrp}</span>
+            ) : (
+              <span className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">₹{product.price}</span>
+            )}
           </div>
 
           {/* Stock Status */}
-          <p className={`text-sm font-bold mb-4 ${inStock ? 'text-green-600' : 'text-red-600'}`}>
-            {inStock ? `✓ ${product.stock} in stock` : 'Out of Stock'}
+          <p className={`text-sm font-bold mb-4 ${
+            product.stock > 0 ? 'text-green-600' : 'text-red-600'
+          }`}>
+            {product.stock > 0 ? `✓ ${getStockDisplay()}` : '✗ Out of Stock'}
           </p>
 
           {/* Action Buttons */}

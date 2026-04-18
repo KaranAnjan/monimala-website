@@ -3,6 +3,11 @@ import { supabase } from '../lib/supabaseClient'
 
 const AuthContext = createContext({})
 
+// Admin emails list - update here to add new admin users
+const ADMIN_EMAILS = [
+  'anjankaran246@gmail.com'
+]
+
 export const useAuth = () => useContext(AuthContext)
 
 export const AuthProvider = ({ children }) => {
@@ -40,8 +45,10 @@ export const AuthProvider = ({ children }) => {
     if (error) throw error
   }
 
+  const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase())
+
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signOut, isAdmin, ADMIN_EMAILS }}>
       {children}
     </AuthContext.Provider>
   )

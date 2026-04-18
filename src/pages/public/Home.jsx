@@ -21,19 +21,19 @@ const Home = () => {
 
       {/* Featured Products with Categories Sidebar */}
       <section className="max-w-7xl mx-auto px-4 py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           {/* Categories Sidebar - Left */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl border border-gray-200 p-6 sticky top-24">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Shop by Category</h3>
-              <div className="space-y-3">
+            <div className="bg-white rounded-lg border border-gray-200 p-4 sticky top-24">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Shop by Category</h3>
+              <div className="space-y-2">
                 {/* All Products Button */}
                 <button
                   onClick={() => setSelectedCategory(null)}
-                  className={`w-full p-4 rounded-lg text-left font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 ${
+                  className={`w-full px-3 py-2 rounded-lg text-sm text-left font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 ${
                     selectedCategory === null
-                      ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg scale-105 animate-pulse'
-                      : 'bg-white border-2 border-gray-200 text-gray-900 hover:border-purple-300 hover:shadow-md'
+                      ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-md scale-105 animate-pulse'
+                      : 'bg-white border-2 border-gray-200 text-gray-900 hover:border-purple-300'
                   }`}
                 >
                   ✨ All Products
@@ -44,10 +44,10 @@ const Home = () => {
                   <button
                     key={cat.id}
                     onClick={() => setSelectedCategory(selectedCategory === cat.id ? null : cat.id)}
-                    className={`w-full p-4 rounded-lg text-left font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 ${
+                    className={`w-full px-3 py-2 rounded-lg text-sm text-left font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95 ${
                       selectedCategory === cat.id
-                        ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg scale-105 animate-pulse'
-                        : 'bg-white border-2 border-gray-200 text-gray-900 hover:border-purple-300 hover:shadow-md'
+                        ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-md scale-105 animate-pulse'
+                        : 'bg-white border-2 border-gray-200 text-gray-900 hover:border-purple-300'
                     }`}
                   >
                     {cat.category === 'jewellery' ? '💎' : cat.category === 'gifts' ? '🎁' : '💄'} {cat.category_name}
@@ -58,7 +58,7 @@ const Home = () => {
           </div>
 
           {/* Featured Products - Right */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-4">
             <div className="mb-8">
               <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">Featured Products</h2>
               <p className="text-xl text-gray-600">Discover our latest collections</p>

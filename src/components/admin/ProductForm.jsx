@@ -15,6 +15,7 @@ const ProductForm = ({ product, onSave, onCancel }) => {
     image_url: '',
     stock: 0,
     price: 0,
+    mrp: 0,
   })
 
   useEffect(() => {
@@ -26,6 +27,7 @@ const ProductForm = ({ product, onSave, onCancel }) => {
         image_url: product.image_url || '',
         stock: product.stock || 0,
         price: product.price || 0,
+        mrp: product.mrp || 0,
       })
     }
   }, [product])
@@ -133,6 +135,23 @@ const ProductForm = ({ product, onSave, onCancel }) => {
               value={form.price}
               onChange={(e) =>
                 setForm({ ...form, price: parseFloat(e.target.value) })
+              }
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              MRP (₹) *
+            </label>
+            <input
+              type="number"
+              required
+              min="0"
+              step="0.01"
+              value={form.mrp}
+              onChange={(e) =>
+                setForm({ ...form, mrp: parseFloat(e.target.value) })
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             />

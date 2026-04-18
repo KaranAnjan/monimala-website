@@ -34,6 +34,13 @@ const ProductDetail = () => {
     window.location.href = `tel:${phone}`
   }
 
+  // Get stock display text
+  const getStockDisplay = () => {
+    if (product.stock === 0) return 'Out of Stock'
+    if (product.stock <= 3) return `${product.stock} available`
+    return 'Available'
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 py-12">
       <div className="max-w-7xl mx-auto px-4">
@@ -84,13 +91,28 @@ const ProductDetail = () => {
             </div>
 
             {/* Price */}
-            <div className="bg-gradient-to-r from-orange-100 to-pink-100 rounded-2xl p-6">
+            <div className="bg-gradient-to-r from-purple-100 to-pink-100 rounded-2xl p-6">
               <p className="text-gray-600 text-sm mb-1">Price</p>
-              <div className="flex items-center gap-2">
-                <IndianRupee className="h-10 w-10 text-orange-600" />
-                <span className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-orange-600 to-pink-600">
-                  {product.price}
-                </span>
+              <div className="flex items-center gap-3">
+                <IndianRupee className="h-10 w-10 text-purple-600" />
+                <div className="flex items-center gap-2">
+                  {product.price && product.mrp ? (
+                    <>
+                      <span className="text-2xl text-gray-400 line-through">₹{product.mrp}</span>
+                      <span className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+                        {product.price}
+                      </span>
+                    </>
+                  ) : product.mrp ? (
+                    <span className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+                      {product.mrp}
+                    </span>
+                  ) : (
+                    <span className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+                      {product.price}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -103,7 +125,7 @@ const ProductDetail = () => {
               }`}
             >
               {product.stock > 0
-                ? `✓ In Stock — ${product.stock} units available`
+                ? `✓ ${getStockDisplay()}`
                 : '✗ Out of Stock'}
             </div>
 

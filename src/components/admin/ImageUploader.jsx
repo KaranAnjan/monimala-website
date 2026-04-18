@@ -75,6 +75,7 @@ const ImageUploader = ({ onUpload, currentImage }) => {
         >
           <option value="Gifts">Gifts</option>
           <option value="Jwellery">Jwellery</option>
+          <option value="Cosmetics">Cosmetics</option>
         </select>
       </div>
 
