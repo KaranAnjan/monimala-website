@@ -1,13 +1,58 @@
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../../context/CartContext'
-import { Trash2, Minus, Plus, MessageCircle, ArrowLeft, ShoppingCart } from 'lucide-react'
-import { getImageUrl } from '../../lib/supabaseClient'
+import { useAuth } from '../../context/AuthContext'
+import { Trash2, Minus, Plus, MessageCircle, ArrowLeft, ShoppingCart, MapPin, CheckCircle } from 'lucide-react'
+import { supabase, getImageUrl } from '../../lib/supabaseClient'
 import toast from 'react-hot-toast'
+
+const INDIAN_STATES = [
+  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
+  'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand',
+  'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
+  'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
+  'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
+  'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+  'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
+  'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
+]
 
 const Cart = () => {
   const navigate = useNavigate()
   const { cart, removeFromCart, updateQuantity, total, clearCart } = useCart()
+  const { user } = useAuth()
   const phone = import.meta.env.VITE_PHONE || '+917407437378'
+
+  const [showAddressForm, setShowAddressForm] = useState(false)
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false)
+  const [address, setAddress] = useState({
+    name: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    pincode: ''
+  })
+
+  // When user logs in (or comes back from login page), fetch their saved profile
+  useEffect(() => {
+    if (user) {
+      const fetchProfile = async () => {
+        const { data } = await supabase.from('users').select('*').eq('id', user.id).single()
+        if (data) {
+          setAddress({
+            name: data.name || '',
+            phone: data.phone || '',
+            address: data.address || '',
+            city: data.city || '',
+            state: data.state || '',
+            pincode: data.pincode || ''
+          })
+        }
+      }
+      fetchProfile()
+    }
+  }, [user])
 
   const handleWhatsAppOrder = () => {
     if (cart.length === 0) {
@@ -31,13 +76,73 @@ const Cart = () => {
     )
   }
 
-  const handlePayment = () => {
+  const handleProceedToCheckout = () => {
     if (cart.length === 0) {
       toast.error('Cart is empty!')
       return
     }
-    // TODO: Integrate Razorpay or other payment gateway
-    toast.info('Payment gateway coming soon!')
+    if (!user) {
+      toast.error('Please login to continue checkout')
+      navigate('/login?redirect=/cart')
+      return
+    }
+    setShowAddressForm(true)
+  }
+
+  const handlePlaceOrder = async (e) => {
+    e.preventDefault()
+    if (!user) return
+    
+    setIsPlacingOrder(true)
+    try {
+      // 1. Upsert user profile (ensures user exists in public.users table)
+      const { error: userError } = await supabase.from('users').upsert({
+        id: user.id,
+        email: user.email || '',
+        name: address.name,
+        phone: address.phone,
+        address: address.address,
+        city: address.city,
+        state: address.state,
+        pincode: address.pincode,
+        updated_at: new Date().toISOString(),
+        is_active: true
+      }, { onConflict: 'id' })
+      
+      if (userError) throw userError
+
+      // 2. Create order
+      const orderId = crypto.randomUUID()
+      const { error: orderError } = await supabase.from('orders').insert({
+        id: orderId,
+        user_id: user.id,
+        total_amount: total,
+        status: 'pending',
+        created_at: new Date().toISOString()
+      })
+      if (orderError) throw orderError
+
+      // 3. Create order items
+      const orderItems = cart.map(item => ({
+        id: crypto.randomUUID(),
+        order_id: orderId,
+        product_id: item.id,
+        quantity: item.quantity,
+        price: item.price
+      }))
+      const { error: itemsError } = await supabase.from('order_items').insert(orderItems)
+      if (itemsError) throw itemsError
+
+      // Success
+      toast.success('Order placed successfully! (Cash on Delivery)')
+      clearCart()
+      navigate('/profile')
+    } catch (error) {
+      console.error(error)
+      toast.error('Failed to place order. Please try again.')
+    } finally {
+      setIsPlacingOrder(false)
+    }
   }
 
   if (cart.length === 0) {
@@ -175,47 +280,138 @@ const Cart = () => {
                 </p>
               </div>
 
-              {/* Buttons */}
-              <div className="space-y-3">
-                {/* WhatsApp Order */}
-                <button
-                  onClick={handleWhatsAppOrder}
-                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-3 md:py-4 px-4 md:px-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 hover:shadow-lg hover:-translate-y-1 flex items-center justify-center gap-2 text-sm md:text-base group"
-                >
-                  <MessageCircle className="h-4 w-4 md:h-5 md:w-5 group-hover:scale-125 transition-transform flex-shrink-0" />
-                  Order via WhatsApp
-                </button>
+              {/* Buttons or Address Form */}
+              {!showAddressForm ? (
+                <div className="space-y-3">
+                  {/* WhatsApp Order */}
+                  <button
+                    onClick={handleWhatsAppOrder}
+                    className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-3 md:py-4 px-4 md:px-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 hover:shadow-lg hover:-translate-y-1 flex items-center justify-center gap-2 text-sm md:text-base group"
+                  >
+                    <MessageCircle className="h-4 w-4 md:h-5 md:w-5 group-hover:scale-125 transition-transform flex-shrink-0" />
+                    Order via WhatsApp
+                  </button>
 
-                {/* Payment Button */}
-                <button
-                  onClick={handlePayment}
-                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-3 md:py-4 px-4 md:px-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 hover:shadow-lg hover:-translate-y-1 text-sm md:text-base"
-                >
-                  Proceed to Payment
-                </button>
+                  {/* Checkout Button */}
+                  <button
+                    onClick={handleProceedToCheckout}
+                    className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-3 md:py-4 px-4 md:px-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 hover:shadow-lg hover:-translate-y-1 text-sm md:text-base"
+                  >
+                    Proceed to Checkout
+                  </button>
 
-                {/* Continue Shopping */}
-                <button
-                  onClick={() => navigate('/products')}
-                  className="w-full border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 font-bold py-2 md:py-3 px-4 md:px-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 text-sm md:text-base"
-                >
-                  Continue Shopping
-                </button>
+                  {/* Continue Shopping */}
+                  <button
+                    onClick={() => navigate('/products')}
+                    className="w-full border-2 border-indigo-600 text-indigo-600 hover:bg-indigo-50 font-bold py-2 md:py-3 px-4 md:px-6 rounded-xl transition-all duration-300 transform hover:scale-105 active:scale-95 text-sm md:text-base"
+                  >
+                    Continue Shopping
+                  </button>
 
-                {/* Clear Cart */}
-                <button
-                  onClick={() => {
-                    clearCart()
-                    toast.success('Cart cleared!')
-                  }}
-                  className="w-full text-red-600 hover:text-red-800 hover:bg-red-50 text-xs md:text-sm font-medium py-2 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95"
-                >
-                  Clear Cart
-                </button>
-              </div>
+                  {/* Clear Cart */}
+                  <button
+                    onClick={() => {
+                      clearCart()
+                      toast.success('Cart cleared!')
+                    }}
+                    className="w-full text-red-600 hover:text-red-800 hover:bg-red-50 text-xs md:text-sm font-medium py-2 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95"
+                  >
+                    Clear Cart
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handlePlaceOrder} className="space-y-4 animate-fade-in border-t border-gray-200 pt-6">
+                  <div className="flex items-center gap-2 mb-4 text-purple-700 font-bold">
+                    <MapPin className="h-5 w-5" />
+                    <h3>Delivery Details</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 gap-4">
+                    <input
+                      type="text"
+                      required
+                      placeholder="Full Name"
+                      value={address.name}
+                      onChange={e => setAddress({...address, name: e.target.value})}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    />
+                    <input
+                      type="tel"
+                      required
+                      placeholder="Phone Number"
+                      value={address.phone}
+                      onChange={e => setAddress({...address, phone: e.target.value})}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    />
+                    <textarea
+                      required
+                      placeholder="Full Address"
+                      rows="2"
+                      value={address.address}
+                      onChange={e => setAddress({...address, address: e.target.value})}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                    ></textarea>
+                    <div className="grid grid-cols-2 gap-4">
+                      <input
+                        type="text"
+                        required
+                        placeholder="City"
+                        value={address.city}
+                        onChange={e => setAddress({...address, city: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      />
+                      <select
+                        required
+                        value={address.state}
+                        onChange={e => setAddress({...address, state: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white"
+                      >
+                        <option value="" disabled>Select State</option>
+                        {INDIAN_STATES.map(state => (
+                          <option key={state} value={state}>{state}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <input
+                      type="text"
+                      required
+                      placeholder="PIN Code"
+                      value={address.pincode}
+                      onChange={e => setAddress({...address, pincode: e.target.value})}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div className="bg-yellow-50 text-yellow-800 p-3 rounded-lg text-sm mb-4 border border-yellow-200">
+                    <strong>Payment Method:</strong> Cash on Delivery (COD) only.
+                  </div>
+
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowAddressForm(false)}
+                      className="flex-1 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 font-bold py-3 rounded-xl transition-all duration-300 text-sm"
+                    >
+                      Back
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={isPlacingOrder}
+                      className={`flex-[2] bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-bold py-3 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 text-sm shadow-lg ${isPlacingOrder ? 'opacity-70 cursor-not-allowed' : 'hover:scale-105 active:scale-95'}`}
+                    >
+                      {isPlacingOrder ? 'Placing Order...' : (
+                        <>
+                          <CheckCircle className="h-5 w-5" />
+                          Place Order (COD)
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              )}
 
               {/* Info */}
-              {cart.length >= 3 && (
+              {cart.length >= 3 && !showAddressForm && (
                 <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
                   <p className="text-sm text-blue-700">
                     ✓ You have 3+ items! Get special pricing via WhatsApp.

@@ -14,6 +14,9 @@ import Home from './pages/public/Home'
 import Products from './pages/public/Products'
 import ProductDetail from './pages/public/ProductDetail'
 import Cart from './pages/public/Cart'
+import Login from './pages/public/Login'
+import Register from './pages/public/Register'
+import Profile from './pages/public/Profile'
 
 // Admin Pages
 import AdminLogin from './pages/admin/AdminLogin'
@@ -53,6 +56,9 @@ function App() {
             <Route path="/products" element={<PublicLayout><Products /></PublicLayout>} />
             <Route path="/products/:id" element={<PublicLayout><ProductDetail /></PublicLayout>} />
             <Route path="/cart" element={<PublicLayout><Cart /></PublicLayout>} />
+            <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
+            <Route path="/register" element={<PublicLayout><Register /></PublicLayout>} />
+            <Route path="/profile" element={<PublicLayout><Profile /></PublicLayout>} />
 
             {/* Admin Login (no layout) */}
             <Route path="/admin/login" element={<AdminLogin />} />

@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom'
-import { ShoppingCart, Menu, X, ChevronDown } from 'lucide-react'
+import { ShoppingCart, Menu, X, ChevronDown, User } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
 import { useAuth } from '../../context/AuthContext'
 import { useState } from 'react'
@@ -7,7 +7,7 @@ import logo from '../../assets/logo.png'
 
 const Navbar = () => {
   const { cart } = useCart()
-  const { isAdmin } = useAuth()
+  const { user, isAdmin } = useAuth()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [productsDropdownOpen, setProductsDropdownOpen] = useState(false)
   const location = useLocation()
@@ -98,6 +98,19 @@ const Navbar = () => {
               )}
             </Link>
 
+            {/* Profile/Login */}
+            {user ? (
+              <Link to="/profile" className="hidden md:flex text-gray-700 hover:text-purple-600 transition-colors duration-300 items-center gap-1 group">
+                <div className="bg-purple-100 p-2 rounded-full group-hover:bg-purple-200 transition-colors">
+                  <User className="h-5 w-5 text-purple-600" />
+                </div>
+              </Link>
+            ) : (
+              <Link to="/login" className="hidden md:flex bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:from-purple-700 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 text-sm">
+                Login
+              </Link>
+            )}
+
             {/* Admin Button - Only visible to admin users */}
             {isAdmin && (
               <Link
@@ -173,6 +186,34 @@ const Navbar = () => {
               <ShoppingCart className="h-5 w-5" />
               Cart {cartCount > 0 && `(${cartCount})`}
             </Link>
+            
+            {user ? (
+              <Link 
+                to="/profile" 
+                className={`block px-4 py-3 rounded font-medium text-lg transition-all duration-300 flex items-center gap-2 margin-2 ${
+                  isActive('/profile') 
+                    ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg mx-3 rounded-lg' 
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <User className="h-5 w-5" />
+                My Profile
+              </Link>
+            ) : (
+              <Link 
+                to="/login" 
+                className={`block px-4 py-3 rounded font-medium text-lg transition-all duration-300 flex items-center gap-2 margin-2 ${
+                  isActive('/login') 
+                    ? 'bg-gradient-to-r from-purple-600 to-purple-500 text-white shadow-lg mx-3 rounded-lg' 
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <User className="h-5 w-5" />
+                Login / Register
+              </Link>
+            )}
             <Link 
               to="/admin" 
               className={`block px-4 py-3 rounded font-medium text-lg transition-all duration-300 margin-2 ${

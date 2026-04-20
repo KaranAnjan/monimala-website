@@ -40,6 +40,18 @@ export const AuthProvider = ({ children }) => {
     return data
   }
 
+  const signUp = async (email, password, metadata) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: metadata,
+      },
+    })
+    if (error) throw error
+    return data
+  }
+
   const signOut = async () => {
     const { error } = await supabase.auth.signOut()
     if (error) throw error
@@ -48,7 +60,7 @@ export const AuthProvider = ({ children }) => {
   const isAdmin = user?.email && ADMIN_EMAILS.includes(user.email.toLowerCase())
 
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signOut, isAdmin, ADMIN_EMAILS }}>
+    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, isAdmin, ADMIN_EMAILS }}>
       {children}
     </AuthContext.Provider>
   )
