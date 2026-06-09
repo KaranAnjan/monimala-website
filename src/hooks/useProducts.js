@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabaseClient'
 
-export const useProducts = (categoryId = null) => {
+const SKIP = {}
+
+export const useProducts = (categoryId) => {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (id) => {
     try {
       setLoading(true)
       let query = supabase
@@ -14,8 +16,8 @@ export const useProducts = (categoryId = null) => {
         .select(`*, categories(category_name)`)
         .order('created_at', { ascending: false })
 
-      if (categoryId) {
-        query = query.eq('category_id', categoryId)
+      if (id) {
+        query = query.eq('category_id', id)
       }
 
       const { data, error } = await query
@@ -29,11 +31,18 @@ export const useProducts = (categoryId = null) => {
   }
 
   useEffect(() => {
-    fetchProducts()
+    if (categoryId === SKIP) {
+      setProducts([])
+      setLoading(true)
+      return
+    }
+    fetchProducts(categoryId)
   }, [categoryId])
 
-  return { products, loading, error, refetch: fetchProducts }
+  return { products, loading, error, refetch: () => fetchProducts(categoryId) }
 }
+
+export { SKIP as SKIP_FETCH }
 
 export const useProduct = (id) => {
   const [product, setProduct] = useState(null)

@@ -2,79 +2,82 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { supabase, getImageUrl } from '../../lib/supabaseClient'
-import { Package, User, LogOut, Loader, MapPin } from 'lucide-react'
+import { Package, User, LogOut, Loader, MapPin, Edit3, Save } from 'lucide-react'
 import toast from 'react-hot-toast'
+
+const INDIAN_STATES = [
+  'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
+  'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand',
+  'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur',
+  'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab',
+  'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura',
+  'Uttar Pradesh', 'Uttarakhand', 'West Bengal',
+  'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu',
+  'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
+]
+
+const DEFAULT_ADDR = { name: '', phone: '', address: '', city: '', state: '', pincode: '' }
 
 const Profile = () => {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
-  
+
   const [profile, setProfile] = useState(null)
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
+  const [editing, setEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [address, setAddress] = useState({ ...DEFAULT_ADDR })
 
   useEffect(() => {
-    if (!user) {
-      navigate('/login')
-      return
+    if (!user) { navigate('/login'); return }
+    setAddress({ ...DEFAULT_ADDR, ...(user.user_metadata?.address || {}) })
+    setProfile({ ...(user.user_metadata?.address || {}) })
+    fetchOrders()
+  }, [user])
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true)
+      const { data } = await supabase
+        .from('orders').select(`*, order_items(*, products(name, image_url, product_code))`)
+        .eq('user_id', user.id).order('created_at', { ascending: false })
+      setOrders(data || [])
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
     }
+  }
 
-    const fetchProfileAndOrders = async () => {
-      try {
-        setLoading(true)
-        // Fetch user profile
-        const { data: profileData, error: profileError } = await supabase
-          .from('users')
-          .select('*')
-          .eq('id', user.id)
-          .single()
-
-        if (profileError && profileError.code !== 'PGRST116') {
-          console.error("Error fetching profile:", profileError)
-        } else if (profileData) {
-          setProfile(profileData)
-        }
-
-        // Fetch user orders
-        const { data: ordersData, error: ordersError } = await supabase
-          .from('orders')
-          .select(`
-            *,
-            order_items (
-              *,
-              products (
-                name,
-                image_url,
-                product_code
-              )
-            )
-          `)
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-
-        if (ordersError) {
-          console.error("Error fetching orders:", ordersError)
-        } else {
-          setOrders(ordersData || [])
-        }
-      } catch (err) {
-        console.error("Unexpected error:", err)
-      } finally {
-        setLoading(false)
+  const handleSaveAddress = async () => {
+    if (!user) return
+    setSaving(true)
+    try {
+      const payload = {
+        name: address.name, phone: address.phone,
+        address: address.address, city: address.city,
+        state: address.state, pincode: address.pincode,
+        updated_at: new Date().toISOString()
       }
+      const { data: userData, error } = await supabase.auth.updateUser({
+        data: { address: payload }
+      })
+      if (error) throw error
+      setProfile(payload)
+      setEditing(false)
+      toast.success('Address saved!')
+    } catch (_err) {
+      toast.error('Failed to save address')
+    } finally {
+      setSaving(false)
     }
-
-    fetchProfileAndOrders()
-  }, [user, navigate])
+  }
 
   const handleSignOut = async () => {
-    try {
-      await signOut()
-      toast.success('Logged out successfully')
-      navigate('/')
-    } catch (error) {
-      toast.error('Failed to log out')
-    }
+    await signOut()
+    toast.success('Logged out')
+    navigate('/')
   }
 
   if (loading) {
@@ -86,106 +89,150 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <div className="min-h-screen bg-gray-50 py-8 px-4">
+      <div className="max-w-4xl mx-auto space-y-6">
         {/* Profile Header */}
-        <div className="bg-white rounded-2xl shadow-md p-6 md:p-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className="h-24 w-24 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-              <User className="h-10 w-10 text-purple-600" />
+        <div className="bg-white rounded-lg border border-gray-200 p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="h-16 w-16 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <User className="h-7 w-7 text-purple-600" />
             </div>
-            <div className="text-center md:text-left">
-              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">{profile?.name || user?.email}</h1>
-              <p className="text-gray-500">{user?.email}</p>
-              {profile?.phone && <p className="text-gray-500 text-sm mt-1">{profile.phone}</p>}
+            <div>
+              <h1 className="text-lg font-bold text-gray-900">{user?.user_metadata?.name || user?.email}</h1>
+              <p className="text-sm text-gray-500">{user?.email}</p>
             </div>
           </div>
-          <button
-            onClick={handleSignOut}
-            className="flex items-center gap-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
-          >
-            <LogOut className="h-5 w-5" />
+          <button onClick={handleSignOut} className="text-sm text-red-600 hover:text-red-700 transition-colors flex items-center gap-1.5">
+            <LogOut className="h-4 w-4" />
             Sign Out
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Address Info */}
-          <div className="bg-white rounded-2xl shadow-md p-6 h-fit">
-            <div className="flex items-center gap-2 mb-4">
-              <MapPin className="h-5 w-5 text-purple-600" />
-              <h2 className="text-xl font-bold text-gray-900">Saved Address</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Address */}
+          <div className="bg-white rounded-lg border border-gray-200 p-5 h-fit">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-purple-600" />
+                <h2 className="text-base font-bold text-gray-900">Address</h2>
+              </div>
+              {!editing && (profile?.address || profile?.city) && (
+                <button onClick={() => setEditing(true)} className="text-purple-600 hover:text-purple-700 text-xs flex items-center gap-1">
+                  <Edit3 className="h-3 w-3" /> Edit
+                </button>
+              )}
             </div>
-            {profile?.address ? (
-              <div className="text-gray-600 text-sm space-y-1">
-                <p>{profile.address}</p>
-                <p>{profile.city}, {profile.state}</p>
-                <p>PIN: {profile.pincode}</p>
+
+            {editing ? (
+              <div className="space-y-2">
+                <input type="text" placeholder="Full Name" value={address.name}
+                  onChange={e => setAddress({...address, name: e.target.value})}
+                  className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                <input type="tel" placeholder="Phone" value={address.phone}
+                  onChange={e => setAddress({...address, phone: e.target.value})}
+                  className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                <textarea placeholder="Address" rows={2} value={address.address}
+                  onChange={e => setAddress({...address, address: e.target.value})}
+                  className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none" />
+                <div className="grid grid-cols-2 gap-2">
+                  <input type="text" placeholder="City" value={address.city}
+                    onChange={e => setAddress({...address, city: e.target.value})}
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                  <select value={address.state} onChange={e => setAddress({...address, state: e.target.value})}
+                    className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white">
+                    <option value="">State</option>
+                    {INDIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+                <input type="text" placeholder="PIN Code" value={address.pincode}
+                  onChange={e => setAddress({...address, pincode: e.target.value})}
+                  className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                <div className="flex gap-2 pt-1">
+                  <button onClick={() => setEditing(false)} className="flex-1 text-sm text-gray-600 border border-gray-300 rounded-md py-1.5 hover:bg-gray-50 transition-colors">
+                    Cancel
+                  </button>
+                  <button onClick={handleSaveAddress} disabled={saving}
+                    className="flex-1 text-sm bg-purple-700 text-white rounded-md py-1.5 hover:bg-purple-800 transition-colors flex items-center justify-center gap-1">
+                    <Save className="h-3.5 w-3.5" />
+                    {saving ? 'Saving...' : 'Save'}
+                  </button>
+                </div>
               </div>
             ) : (
-              <p className="text-gray-500 text-sm italic">No address saved yet. It will be saved on your first order.</p>
+              <div className="text-sm text-gray-600 space-y-1">
+                {profile?.name && <p className="font-medium text-gray-900">{profile.name}</p>}
+                {profile?.phone && <p className="text-gray-500">{profile.phone}</p>}
+                {profile?.address ? (
+                  <>
+                    <p>{profile.address}</p>
+                    <p>{profile.city}{profile.city && profile.state ? ', ' : ''}{profile.state}</p>
+                    {profile.pincode && <p>PIN: {profile.pincode}</p>}
+                  </>
+                ) : profile?.city ? (
+                  <>
+                    <p>{profile.city}{profile.state ? ', ' + profile.state : ''}</p>
+                    {profile.pincode && <p>PIN: {profile.pincode}</p>}
+                  </>
+                ) : (
+                  <div>
+                    <p className="text-gray-400 text-xs italic mb-2">No address saved.</p>
+                    <button onClick={() => setEditing(true)} className="text-xs text-purple-600 hover:text-purple-700">Add Address</button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
-          {/* Orders History */}
-          <div className="md:col-span-2 space-y-6">
-            <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-              <Package className="h-6 w-6 text-purple-600" />
+          {/* Orders */}
+          <div className="md:col-span-2 space-y-4">
+            <h2 className="text-base font-bold text-gray-900 flex items-center gap-2">
+              <Package className="h-5 w-5 text-purple-600" />
               Order History
             </h2>
 
             {orders.length === 0 ? (
-              <div className="bg-white rounded-2xl shadow-md p-8 text-center">
-                <p className="text-gray-500 mb-4">You haven't placed any orders yet.</p>
-                <button
-                  onClick={() => navigate('/products')}
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition-colors duration-200"
-                >
+              <div className="bg-white rounded-lg border border-gray-200 p-6 text-center">
+                <p className="text-sm text-gray-500 mb-4">No orders yet.</p>
+                <button onClick={() => navigate('/products')} className="bg-purple-700 hover:bg-purple-800 text-white text-sm px-5 py-2 rounded-lg transition-colors">
                   Start Shopping
                 </button>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {orders.map((order) => (
-                  <div key={order.id} className="bg-white rounded-2xl shadow-md p-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 pb-4 border-b border-gray-100 gap-2">
+                  <div key={order.id} className="bg-white rounded-lg border border-gray-200 p-4">
+                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-100 gap-2">
                       <div>
-                        <p className="text-sm text-gray-500">Order ID: {order.id.slice(0, 8)}...</p>
+                        <p className="text-xs text-gray-400">Order #{order.id.slice(0, 8)}</p>
                         <p className="text-xs text-gray-400">{new Date(order.created_at).toLocaleDateString()}</p>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${
+                      <div className="flex items-center gap-3">
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium capitalize ${
                           order.status === 'completed' ? 'bg-green-100 text-green-700' :
                           order.status === 'cancelled' ? 'bg-red-100 text-red-700' :
                           'bg-yellow-100 text-yellow-700'
                         }`}>
                           {order.status || 'pending'}
                         </span>
-                        <p className="font-bold text-lg text-purple-600">₹{order.total_amount}</p>
+                        <span className="text-sm font-bold text-purple-700">₹{order.total_amount}</span>
                       </div>
                     </div>
 
-                    <div className="space-y-4">
+                    <div className="space-y-2">
                       {order.order_items?.map((item) => (
-                        <div key={item.id} className="flex items-center gap-4">
-                          <div className="h-16 w-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                        <div key={item.id} className="flex items-center gap-3">
+                          <div className="h-12 w-12 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
                             {item.products?.image_url ? (
-                              <img
-                                src={getImageUrl(item.products.image_url)}
-                                alt={item.products.name}
-                                className="h-full w-full object-cover"
-                              />
+                              <img src={getImageUrl(item.products.image_url)} alt={item.products.name} className="h-full w-full object-cover" />
                             ) : (
-                              <Package className="h-8 w-8 m-auto text-gray-300 mt-4" />
+                              <Package className="h-5 w-5 m-auto text-gray-300 mt-3.5" />
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">
-                              {item.products?.name || 'Unknown Product'}
-                            </p>
-                            <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                            <p className="text-sm text-gray-900 truncate">{item.products?.name || 'Product'}</p>
+                            <p className="text-xs text-gray-400">Qty: {item.quantity}</p>
                           </div>
-                          <p className="text-sm font-medium text-gray-900">₹{item.price * item.quantity}</p>
+                          <span className="text-sm font-medium text-gray-900">₹{item.price * item.quantity}</span>
                         </div>
                       ))}
                     </div>

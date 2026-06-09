@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
@@ -25,15 +26,6 @@ import ManageProducts from './pages/admin/ManageProducts'
 import ManageCategories from './pages/admin/ManageCategories'
 import ManageStock from './pages/admin/ManageStock'
 
-// Public Layout
-const PublicLayout = ({ children }) => (
-  <div className="flex flex-col min-h-screen">
-    <Navbar />
-    <main className="flex-1">{children}</main>
-    <Footer />
-  </div>
-)
-
 // Admin Layout
 const AdminLayout = ({ children }) => (
   <ProtectedRoute>
@@ -44,31 +36,59 @@ const AdminLayout = ({ children }) => (
   </ProtectedRoute>
 )
 
+function AnimatedRoutes() {
+  const location = useLocation()
+  const isAdmin = location.pathname.startsWith('/admin')
+
+  if (isAdmin) {
+    return (
+      <Routes location={location}>
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin" element={<AdminLayout><Dashboard /></AdminLayout>} />
+        <Route path="/admin/products" element={<AdminLayout><ManageProducts /></AdminLayout>} />
+        <Route path="/admin/categories" element={<AdminLayout><ManageCategories /></AdminLayout>} />
+        <Route path="/admin/stock" element={<AdminLayout><ManageStock /></AdminLayout>} />
+      </Routes>
+    )
+  }
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-1">
+        <AnimatePresence mode="popLayout">
+          <motion.div
+            key={location.pathname + location.search}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.12 }}
+          >
+            <Routes location={location}>
+              <Route path="/" element={<Home />} />
+              <Route path="/products" element={<Products />} />
+              <Route path="/products/:id" element={<ProductDetail />} />
+              <Route path="/category/:slug" element={<Products />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/profile" element={<Profile />} />
+            </Routes>
+          </motion.div>
+        </AnimatePresence>
+      </main>
+      <Footer />
+    </div>
+  )
+}
+
 function App() {
   return (
     <AuthProvider>
       <CartProvider>
         <BrowserRouter>
           <Toaster position="top-right" />
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
-            <Route path="/products" element={<PublicLayout><Products /></PublicLayout>} />
-            <Route path="/products/:id" element={<PublicLayout><ProductDetail /></PublicLayout>} />
-            <Route path="/cart" element={<PublicLayout><Cart /></PublicLayout>} />
-            <Route path="/login" element={<PublicLayout><Login /></PublicLayout>} />
-            <Route path="/register" element={<PublicLayout><Register /></PublicLayout>} />
-            <Route path="/profile" element={<PublicLayout><Profile /></PublicLayout>} />
-
-            {/* Admin Login (no layout) */}
-            <Route path="/admin/login" element={<AdminLogin />} />
-
-            {/* Admin Routes (protected) */}
-            <Route path="/admin" element={<AdminLayout><Dashboard /></AdminLayout>} />
-            <Route path="/admin/products" element={<AdminLayout><ManageProducts /></AdminLayout>} />
-            <Route path="/admin/categories" element={<AdminLayout><ManageCategories /></AdminLayout>} />
-            <Route path="/admin/stock" element={<AdminLayout><ManageStock /></AdminLayout>} />
-          </Routes>
+          <AnimatedRoutes />
         </BrowserRouter>
       </CartProvider>
     </AuthProvider>

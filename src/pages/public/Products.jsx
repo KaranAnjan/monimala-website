@@ -1,77 +1,110 @@
-import { useState, useEffect } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { useProducts } from '../../hooks/useProducts'
+import { useState, useEffect, useMemo } from 'react'
+import { useSearchParams, useParams, Link } from 'react-router-dom'
+import { useProducts, SKIP_FETCH } from '../../hooks/useProducts'
 import { useCategories } from '../../hooks/useCategories'
-import CategoryFilter from '../../components/public/CategoryFilter'
+import { toSlug, formatName } from '../../lib/utils'
 import ProductGrid from '../../components/public/ProductGrid'
 import Loading from '../../components/common/Loading'
-import { Search } from 'lucide-react'
+import { Search, ChevronRight } from 'lucide-react'
+
+const CATEGORY_NAMES = {
+  'fashion-jewellery': 'Fashion Jewellery',
+  gifts: 'Gifts',
+  cosmetics: 'Cosmetics',
+}
 
 const Products = () => {
-  const [searchParams] = useSearchParams()
-  const [selectedCategory, setSelectedCategory] = useState(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const { products, loading } = useProducts(selectedCategory)
-  const { categories } = useCategories()
+  const { slug: routeSlug } = useParams()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const { categories, loading: catLoading } = useCategories()
 
-  // Set selectedCategory from URL parameter on mount and scroll to top
+  const categorySlug = routeSlug || searchParams.get('category')
+  const urlSearch = searchParams.get('search') || ''
+
+  const matchedCategory = useMemo(() => {
+    if (!categorySlug || categories.length === 0) return null
+    return categories.find((c) => toSlug(c.category_name) === categorySlug) || null
+  }, [categorySlug, categories])
+
+  const ready = !categorySlug || (!catLoading && categories.length > 0)
+  const selectedCategory = ready ? (matchedCategory?.id || null) : SKIP_FETCH
+  const { products, loading: prodLoading } = useProducts(selectedCategory)
+
+  const [localSearch, setLocalSearch] = useState(urlSearch)
+
   useEffect(() => {
-    const categoryParam = searchParams.get('category')
-    if (categoryParam) {
-      // Mapping of URL slugs to database category names
-      const categoryMap = {
-        'jwellery': 'Jewellery',
-        'gifts': 'Gifts',
-        'cosmetics': 'Cosmetics',
-        'special-occasions': 'Special Occasions',
-      }
-      
-      // Find the category ID that matches
-      const categoryName = categoryMap[categoryParam]
-      if (categoryName) {
-        const matched = categories.find(cat => 
-          cat.category_name.toLowerCase() === categoryName.toLowerCase()
-        )
-        if (matched) {
-          setSelectedCategory(matched.id)
-        }
-      }
-    }
-    
-    // Scroll to top of page
+    setLocalSearch(urlSearch)
     window.scrollTo(0, 0)
-  }, [searchParams, categories])
+  }, [urlSearch, categorySlug])
 
-  const filteredProducts = products.filter((p) =>
-    p.product_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.product_code.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredProducts = products.filter((p) => {
+    if (!localSearch) return true
+    const q = localSearch.toLowerCase()
+    return (
+      p.product_name.toLowerCase().includes(q) ||
+      p.product_code.toLowerCase().includes(q)
+    )
+  })
+
+  const updateSearch = (value) => {
+    setLocalSearch(value)
+    const params = new URLSearchParams(searchParams)
+    if (value.trim()) {
+      params.set('search', value)
+    } else {
+      params.delete('search')
+    }
+    setSearchParams(params, { replace: true })
+  }
+
+  const displayName = categorySlug
+    ? CATEGORY_NAMES[categorySlug] || formatName(categorySlug.replace(/-/g, ' '))
+    : 'All Products'
+
+  const title = localSearch ? `Search: "${localSearch}"` : displayName
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6 animate-fade-in">All Products</h1>
+    <div className="bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 py-6 md:py-8">
+        {/* Breadcrumb - static, no loading needed */}
+        <nav className="flex items-center gap-1.5 text-xs text-gray-400 mb-4">
+          <Link to="/" className="hover:text-purple-600 transition-colors">Home</Link>
+          <ChevronRight className="h-3 w-3" />
+          <Link to="/products" className="hover:text-purple-600 transition-colors">Products</Link>
+          {categorySlug && (
+            <>
+              <ChevronRight className="h-3 w-3" />
+              <Link to={`/category/${categorySlug}`} className="hover:text-purple-600 transition-colors text-gray-600 font-medium">{displayName}</Link>
+            </>
+          )}
+        </nav>
 
-      {/* Search */}
-      <div className="relative mb-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-        <input
-          type="text"
-          placeholder="Search products by name or code..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-300 hover:border-purple-300 hover:shadow-md"
-        />
+        {/* Header - static, shows immediately */}
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-xl md:text-2xl font-bold text-gray-900">{title}</h1>
+            {!(prodLoading || (categorySlug && catLoading)) && (
+              <p className="text-sm text-gray-500 mt-0.5">
+                {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''}
+              </p>
+            )}
+          </div>
+
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={localSearch}
+              onChange={(e) => updateSearch(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all bg-white"
+            />
+          </div>
+        </div>
+
+        {/* Product Grid - loading only affects this */}
+        {prodLoading || (categorySlug && catLoading) ? <Loading /> : <ProductGrid products={filteredProducts} />}
       </div>
-
-      {/* Category Filter */}
-      <CategoryFilter
-        categories={categories}
-        selected={selectedCategory}
-        onSelect={setSelectedCategory}
-      />
-
-      {/* Products */}
-      {loading ? <Loading /> : <ProductGrid products={filteredProducts} />}
     </div>
   )
 }
