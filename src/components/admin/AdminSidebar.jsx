@@ -5,6 +5,7 @@ import {
   Package,
   FolderOpen,
   BarChart3,
+  Truck,
   LogOut,
   ArrowLeft,
 } from 'lucide-react'
@@ -18,6 +19,7 @@ const AdminSidebar = () => {
     { to: '/admin/products', icon: Package, label: 'Products' },
     { to: '/admin/categories', icon: FolderOpen, label: 'Categories' },
     { to: '/admin/stock', icon: BarChart3, label: 'Stock' },
+    { to: '/admin/delivery', icon: Truck, label: 'Delivery' },
   ]
 
   const isActive = (path) => location.pathname === path

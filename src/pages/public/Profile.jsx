@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { supabase, getImageUrl } from '../../lib/supabaseClient'
-import { Package, User, LogOut, Loader, MapPin, Edit3, Save } from 'lucide-react'
+import { Package, User, LogOut, Loader, MapPin, Edit3, Save, ChevronDown, ChevronUp } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const INDIAN_STATES = [
@@ -28,6 +28,7 @@ const Profile = () => {
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [address, setAddress] = useState({ ...DEFAULT_ADDR })
+  const [expandedOrder, setExpandedOrder] = useState(null)
 
   useEffect(() => {
     if (!user) { navigate('/login'); return }
@@ -39,12 +40,21 @@ const Profile = () => {
   const fetchOrders = async () => {
     try {
       setLoading(true)
-      const { data } = await supabase
-        .from('orders').select(`*, order_items(*, products(name, image_url, product_code))`)
+      const { data: rawOrders, error } = await supabase
+        .from('orders').select('*')
         .eq('user_id', user.id).order('created_at', { ascending: false })
-      setOrders(data || [])
+      if (error) throw error
+
+      const ordersWithItems = await Promise.all((rawOrders || []).map(async (order) => {
+        const { data: items } = await supabase
+          .from('order_items').select('*, products(*)')
+          .eq('order_id', order.id)
+        return { ...order, order_items: items || [] }
+      }))
+
+      setOrders(ordersWithItems)
     } catch (err) {
-      console.error(err)
+      console.error('fetchOrders error:', err)
     } finally {
       setLoading(false)
     }
@@ -200,42 +210,55 @@ const Profile = () => {
             ) : (
               <div className="space-y-3">
                 {orders.map((order) => (
-                  <div key={order.id} className="bg-white rounded-lg border border-gray-200 p-4">
-                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-100 gap-2">
+                  <div key={order.id} className="bg-white rounded-lg border border-gray-200">
+                    <button onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
+                      className="w-full flex items-center justify-between p-4 hover:bg-gray-50 transition-colors text-left">
                       <div>
-                        <p className="text-xs text-gray-400">Order #{order.id.slice(0, 8)}</p>
+                        <p className="text-xs text-gray-400">{order.order_number || `#${order.id}`}</p>
                         <p className="text-xs text-gray-400">{new Date(order.created_at).toLocaleDateString()}</p>
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className={`px-2 py-0.5 rounded text-xs font-medium capitalize ${
-                          order.status === 'completed' ? 'bg-green-100 text-green-700' :
-                          order.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                        <span className={`px-2 py-0.5 rounded text-xs font-medium capitalize whitespace-nowrap ${
+                          order.delivery_status === 'delivered' ? 'bg-green-100 text-green-700' :
+                          order.delivery_status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                          order.delivery_status === 'shipped' || order.delivery_status === 'out_for_delivery' ? 'bg-blue-100 text-blue-700' :
                           'bg-yellow-100 text-yellow-700'
                         }`}>
-                          {order.status || 'pending'}
+                          {order.delivery_status || order.status || 'pending'}
                         </span>
                         <span className="text-sm font-bold text-purple-700">₹{order.total_amount}</span>
+                        {expandedOrder === order.id ? <ChevronUp className="h-4 w-4 text-gray-400" /> : <ChevronDown className="h-4 w-4 text-gray-400" />}
                       </div>
-                    </div>
+                    </button>
 
-                    <div className="space-y-2">
-                      {order.order_items?.map((item) => (
-                        <div key={item.id} className="flex items-center gap-3">
-                          <div className="h-12 w-12 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
-                            {item.products?.image_url ? (
-                              <img src={getImageUrl(item.products.image_url)} alt={item.products.name} className="h-full w-full object-cover" />
-                            ) : (
-                              <Package className="h-5 w-5 m-auto text-gray-300 mt-3.5" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm text-gray-900 truncate">{item.products?.name || 'Product'}</p>
-                            <p className="text-xs text-gray-400">Qty: {item.quantity}</p>
-                          </div>
-                          <span className="text-sm font-medium text-gray-900">₹{item.price * item.quantity}</span>
-                        </div>
-                      ))}
-                    </div>
+                    {expandedOrder === order.id && (
+                      <div className="border-t border-gray-100 p-4 space-y-2">
+                        {order.delivery_date && (
+                          <p className="text-xs text-gray-500 mb-2">Delivered on {new Date(order.delivery_date).toLocaleDateString()}</p>
+                        )}
+                        {order.order_items?.length === 0 ? (
+                          <p className="text-xs text-gray-400">No items in this order.</p>
+                        ) : (
+                          order.order_items?.map((item) => (
+                            <Link key={item.id} to={`/products/${item.product_id}`}
+                              className="flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 transition-colors">
+                              <div className="h-12 w-12 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                                {item.products?.image_url ? (
+                                  <img src={getImageUrl(item.products.image_url)} alt={item.products.name} className="h-full w-full object-cover" />
+                                ) : (
+                                  <Package className="h-5 w-5 m-auto text-gray-300 mt-3.5" />
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm text-gray-900 truncate">{item.products?.name || 'Product'}</p>
+                                <p className="text-xs text-gray-400">Qty: {item.quantity}</p>
+                              </div>
+                              <span className="text-sm font-medium text-gray-900">₹{item.price * item.quantity}</span>
+                            </Link>
+                          ))
+                        )}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

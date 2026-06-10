@@ -4,6 +4,7 @@ import { useCart } from '../../context/CartContext'
 import { useAuth } from '../../context/AuthContext'
 import { Trash2, Minus, Plus, MapPin, ShoppingCart, ArrowLeft } from 'lucide-react'
 import { supabase, getImageUrl } from '../../lib/supabaseClient'
+import { uuid } from '../../lib/utils'
 import toast from 'react-hot-toast'
 
 const INDIAN_STATES = [
@@ -81,16 +82,20 @@ const Cart = () => {
       })
       if (userError) throw userError
 
-      const orderId = crypto.randomUUID()
-      const { error: orderError } = await supabase.from('orders').insert({
-        id: orderId, user_id: user.id, total_amount: total,
-        status: 'pending', created_at: new Date().toISOString()
-      })
+      const fullAddress = `${address.address}, ${address.city}, ${address.state} - ${address.pincode}`
+      const { data: orderData, error: orderError } = await supabase.from('orders').insert({
+        user_id: user.id, total_amount: total,
+        status: 'pending', delivery_status: 'pending',
+        customer_name: address.name, customer_address: fullAddress,
+        customer_pincode: address.pincode,
+        created_at: new Date().toISOString()
+      }).select('id')
       if (orderError) throw orderError
 
+      const orderId = orderData[0].id
       const { error: itemsError } = await supabase.from('order_items').insert(
         cart.map(item => ({
-          id: crypto.randomUUID(), order_id: orderId,
+          order_id: orderId,
           product_id: item.id, quantity: item.quantity, price: item.price
         }))
       )
@@ -101,6 +106,7 @@ const Cart = () => {
       clearCart()
       navigate('/profile')
     } catch (error) {
+      console.error('Order placement error:', error)
       toast.error('Failed to place order. Please try again.')
     } finally {
       setIsPlacingOrder(false)

@@ -12,7 +12,7 @@ const ProductDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { product, loading } = useProduct(id)
-  const { addToCart } = useCart()
+  const { cart, addToCart } = useCart()
 
   if (loading) return <Loading />
   if (!product) return <div className="text-center py-16 text-lg text-gray-500">Product not found</div>
@@ -133,14 +133,22 @@ const ProductDetail = () => {
             <hr className="border-gray-200" />
 
             {/* Add to Cart */}
-            <button
-              onClick={handleAddToCart}
-              disabled={product.stock === 0}
-              className="w-full bg-purple-700 hover:bg-purple-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2 text-sm"
-            >
-              <ShoppingCart className="h-4 w-4" />
-              {product.stock > 0 ? 'Add to Cart' : 'Sold Out'}
-            </button>
+            {cart.some(item => item.id === product.id) ? (
+              <Link to="/cart"
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2 text-sm">
+                <ShoppingCart className="h-4 w-4" />
+                View Cart
+              </Link>
+            ) : (
+              <button
+                onClick={handleAddToCart}
+                disabled={product.stock === 0}
+                className="w-full bg-purple-700 hover:bg-purple-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all flex items-center justify-center gap-2 text-sm"
+              >
+                <ShoppingCart className="h-4 w-4" />
+                {product.stock > 0 ? 'Add to Cart' : 'Sold Out'}
+              </button>
+            )}
 
             {/* Contact Row */}
             <div className="grid grid-cols-2 gap-3">

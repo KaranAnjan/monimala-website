@@ -25,6 +25,7 @@ import Dashboard from './pages/admin/Dashboard'
 import ManageProducts from './pages/admin/ManageProducts'
 import ManageCategories from './pages/admin/ManageCategories'
 import ManageStock from './pages/admin/ManageStock'
+import ManageDelivery from './pages/admin/ManageDelivery'
 
 // Admin Layout
 const AdminLayout = ({ children }) => (
@@ -48,6 +49,7 @@ function AnimatedRoutes() {
         <Route path="/admin/products" element={<AdminLayout><ManageProducts /></AdminLayout>} />
         <Route path="/admin/categories" element={<AdminLayout><ManageCategories /></AdminLayout>} />
         <Route path="/admin/stock" element={<AdminLayout><ManageStock /></AdminLayout>} />
+        <Route path="/admin/delivery" element={<AdminLayout><ManageDelivery /></AdminLayout>} />
       </Routes>
     )
   }

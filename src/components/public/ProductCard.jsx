@@ -6,8 +6,9 @@ import toast from 'react-hot-toast'
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate()
-  const { addToCart } = useCart()
+  const { cart, addToCart } = useCart()
   const inStock = product.stock > 0
+  const inCart = cart.some(item => item.id === product.id)
 
   const imageUrl = product.image_url ? getImageUrl(product.image_url) : null
 
@@ -81,14 +82,22 @@ const ProductCard = ({ product }) => {
           )}
 
           <div className="mt-auto">
-            <button
-              onClick={handleAddToCart}
-              disabled={!inStock}
-              className="w-full bg-purple-700 hover:bg-purple-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-2 px-3 rounded-lg text-xs transition-all flex items-center justify-center gap-1.5"
-            >
-              <ShoppingCart className="h-3.5 w-3.5" />
-              {inStock ? 'Add to Cart' : 'Sold Out'}
-            </button>
+            {inCart ? (
+              <Link to="/cart"
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-3 rounded-lg text-xs transition-all flex items-center justify-center gap-1.5">
+                <ShoppingCart className="h-3.5 w-3.5" />
+                View Cart
+              </Link>
+            ) : (
+              <button
+                onClick={handleAddToCart}
+                disabled={!inStock}
+                className="w-full bg-purple-700 hover:bg-purple-800 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium py-2 px-3 rounded-lg text-xs transition-all flex items-center justify-center gap-1.5"
+              >
+                <ShoppingCart className="h-3.5 w-3.5" />
+                {inStock ? 'Add to Cart' : 'Sold Out'}
+              </button>
+            )}
           </div>
         </div>
       </div>
