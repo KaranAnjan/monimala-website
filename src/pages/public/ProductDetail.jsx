@@ -1,9 +1,10 @@
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useProduct } from '../../hooks/useProducts'
 import { useCart } from '../../context/CartContext'
+import { useWishlist } from '../../context/WishlistContext'
 import Loading from '../../components/common/Loading'
 import { motion } from 'framer-motion'
-import { ArrowLeft, ShoppingCart, ChevronRight, IndianRupee } from 'lucide-react'
+import { ArrowLeft, ShoppingCart, ChevronRight, IndianRupee, Heart } from 'lucide-react'
 import { getImageUrl } from '../../lib/supabaseClient'
 import { toSlug, formatName } from '../../lib/utils'
 import toast from 'react-hot-toast'
@@ -13,6 +14,7 @@ const ProductDetail = () => {
   const navigate = useNavigate()
   const { product, loading } = useProduct(id)
   const { cart, addToCart } = useCart()
+  const { isInWishlist, toggleWishlist } = useWishlist()
 
   if (loading) return <Loading />
   if (!product) return <div className="text-center py-16 text-lg text-gray-500">Product not found</div>
@@ -61,7 +63,7 @@ const ProductDetail = () => {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.3, ease: 'easeOut' }}
-            className="bg-white rounded-lg border border-gray-200 overflow-hidden group"
+            className="bg-white rounded-lg border border-gray-200 overflow-hidden group relative"
           >
             <div className="aspect-square">
               {product.image_url ? (
@@ -76,6 +78,12 @@ const ProductDetail = () => {
                 </div>
               )}
             </div>
+            <button
+              onClick={() => toggleWishlist(product.id)}
+              className="absolute top-3 right-3 p-2 rounded-full bg-white/80 hover:bg-white shadow-sm transition-all z-10"
+            >
+              <Heart className={`h-5 w-5 transition-colors ${isInWishlist(product.id) ? 'fill-purple-600 text-purple-600' : 'text-gray-600'}`} />
+            </button>
           </motion.div>
 
           {/* Details */}

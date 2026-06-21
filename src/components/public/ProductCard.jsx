@@ -1,14 +1,17 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { ShoppingCart } from 'lucide-react'
+import { Heart, ShoppingCart } from 'lucide-react'
 import { useCart } from '../../context/CartContext'
+import { useWishlist } from '../../context/WishlistContext'
 import { getImageUrl } from '../../lib/supabaseClient'
 import toast from 'react-hot-toast'
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate()
   const { cart, addToCart } = useCart()
+  const { isInWishlist, toggleWishlist } = useWishlist()
   const inStock = product.stock > 0
   const inCart = cart.some(item => item.id === product.id)
+  const wishlisted = isInWishlist(product.id)
 
   const imageUrl = product.image_url ? getImageUrl(product.image_url) : null
 
@@ -55,6 +58,13 @@ const ProductCard = ({ product }) => {
               <span className="text-white font-semibold text-sm bg-black/60 px-3 py-1 rounded">Out of Stock</span>
             </div>
           )}
+
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(product.id) }}
+            className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 hover:bg-white shadow-sm transition-all z-10"
+          >
+            <Heart className={`h-4 w-4 transition-colors ${wishlisted ? 'fill-purple-600 text-purple-600' : 'text-gray-600'}`} />
+          </button>
         </div>
 
         <div className="p-4 flex flex-col flex-1">

@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
+import { WishlistProvider } from './context/WishlistContext'
 
 // Layouts
 import Navbar from './components/common/Navbar'
@@ -88,10 +89,12 @@ function App() {
   return (
     <AuthProvider>
       <CartProvider>
+        <WishlistProvider>
         <BrowserRouter>
           <Toaster position="top-right" />
           <AnimatedRoutes />
         </BrowserRouter>
+        </WishlistProvider>
       </CartProvider>
     </AuthProvider>
   )
