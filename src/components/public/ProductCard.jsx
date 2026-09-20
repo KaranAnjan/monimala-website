@@ -35,9 +35,10 @@ const ProductCard = ({ product }) => {
   }
 
   return (
-    <Link to={`/products/${product.id}`} className="group block h-full">
+    <div className="group block h-full">
       <div className="bg-white rounded-lg border border-gray-200 hover:border-purple-200 hover:shadow-lg transition-all duration-300 flex flex-col h-full overflow-hidden">
         <div className="relative aspect-[4/3] bg-gray-50 overflow-hidden">
+          <Link to={`/products/${product.id}`} className="absolute inset-0 block">
           {imageUrl ? (
             <img
               src={imageUrl}
@@ -58,9 +59,10 @@ const ProductCard = ({ product }) => {
               <span className="text-white font-semibold text-sm bg-black/60 px-3 py-1 rounded">Out of Stock</span>
             </div>
           )}
+          </Link>
 
           <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(product.id) }}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggleWishlist(product) }}
             className="absolute top-2 right-2 p-1.5 rounded-full bg-white/80 hover:bg-white shadow-sm transition-all z-10"
           >
             <Heart className={`h-4 w-4 transition-colors ${wishlisted ? 'fill-purple-600 text-purple-600' : 'text-gray-600'}`} />
@@ -68,9 +70,9 @@ const ProductCard = ({ product }) => {
         </div>
 
         <div className="p-4 flex flex-col flex-1">
-          <h3 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2 leading-snug">
+          <Link to={`/products/${product.id}`} className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2 leading-snug hover:text-purple-700">
             {product.product_name}
-          </h3>
+          </Link>
 
           <p className="text-xs text-gray-400 font-mono mb-3">{product.product_code}</p>
 
@@ -111,7 +113,7 @@ const ProductCard = ({ product }) => {
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   )
 }
 

@@ -19,6 +19,7 @@ import Cart from './pages/public/Cart'
 import Login from './pages/public/Login'
 import Register from './pages/public/Register'
 import Profile from './pages/public/Profile'
+import Wishlist from './pages/public/Wishlist'
 
 // Admin Pages
 import AdminLogin from './pages/admin/AdminLogin'
@@ -73,6 +74,7 @@ function AnimatedRoutes() {
               <Route path="/products/:id" element={<ProductDetail />} />
               <Route path="/category/:slug" element={<Products />} />
               <Route path="/cart" element={<Cart />} />
+              <Route path="/wishlist" element={<Wishlist />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/profile" element={<Profile />} />

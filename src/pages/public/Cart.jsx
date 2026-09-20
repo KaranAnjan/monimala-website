@@ -20,7 +20,7 @@ const INDIAN_STATES = [
 
 const Cart = () => {
   const navigate = useNavigate()
-  const { cart, removeFromCart, updateQuantity, total, clearCart } = useCart()
+  const { cart, loading: cartLoading, removeFromCart, updateQuantity, total, clearCart } = useCart()
   const { user } = useAuth()
   const phone = import.meta.env.VITE_PHONE || '+917407437378'
 
@@ -111,6 +111,14 @@ const Cart = () => {
     } finally {
       setIsPlacingOrder(false)
     }
+  }
+
+  if (cartLoading) {
+    return (
+      <div className="bg-gray-50 min-h-screen py-12">
+        <p className="text-center text-gray-500 py-16" role="status">Loading your cart...</p>
+      </div>
+    )
   }
 
   if (cart.length === 0) {

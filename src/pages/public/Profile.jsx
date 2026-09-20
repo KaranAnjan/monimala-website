@@ -28,10 +28,11 @@ const getCurrentStep = (status) => {
 }
 
 const Profile = () => {
-  const { user, signOut } = useAuth()
+  const { user, profileSummary, signOut } = useAuth()
   const navigate = useNavigate()
 
   const [profile, setProfile] = useState(null)
+  const [profileOwnerId, setProfileOwnerId] = useState(null)
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState(false)
@@ -40,34 +41,73 @@ const Profile = () => {
   const [expandedOrder, setExpandedOrder] = useState(null)
 
   useEffect(() => {
-    if (!user) { navigate('/login'); return }
-    setAddress({ ...DEFAULT_ADDR, ...(user.user_metadata?.address || {}) })
-    setProfile({ ...(user.user_metadata?.address || {}) })
-    fetchOrders()
-  }, [user])
+    if (!user) {
+      setOrders([])
+      setProfile(null)
+      setAddress({ ...DEFAULT_ADDR })
+      setLoading(false)
+      navigate('/login')
+      return
+    }
 
-  const fetchOrders = async () => {
-    try {
-      setLoading(true)
-      const { data: rawOrders, error } = await supabase
+    let cancelled = false
+    setLoading(true)
+    setOrders([])
+    setExpandedOrder(null)
+    const metadataAddress = user.user_metadata?.address || {}
+    setAddress({ ...DEFAULT_ADDR, ...metadataAddress })
+
+    const restoreProfile = async () => {
+      const currentProfile = {
+        ...metadataAddress,
+        name: user.user_metadata?.name || '',
+      }
+      if (!cancelled) {
+        setProfile(currentProfile)
+        setAddress({ ...DEFAULT_ADDR, ...currentProfile })
+      }
+
+      const { data: rawOrders, error: ordersError } = await supabase
         .from('orders').select('*')
         .eq('user_id', user.id).order('created_at', { ascending: false })
-      if (error) throw error
+      if (ordersError) throw ordersError
 
-      const ordersWithItems = await Promise.all((rawOrders || []).map(async (order) => {
-        const { data: items } = await supabase
+      const orderIds = (rawOrders || []).map((order) => order.id)
+      let allItems = []
+      if (orderIds.length) {
+        const { data: items, error: itemsError } = await supabase
           .from('order_items').select('*, products(*)')
-          .eq('order_id', order.id)
-        return { ...order, order_items: items || [] }
+          .in('order_id', orderIds)
+        if (itemsError) throw itemsError
+        allItems = items || []
+      }
+      const itemsByOrder = new Map()
+      for (const item of allItems) {
+        const orderItems = itemsByOrder.get(item.order_id) || []
+        orderItems.push(item)
+        itemsByOrder.set(item.order_id, orderItems)
+      }
+      const ordersWithItems = (rawOrders || []).map((order) => ({
+        ...order,
+        order_items: itemsByOrder.get(order.id) || [],
       }))
 
-      setOrders(ordersWithItems)
-    } catch (err) {
-      console.error('fetchOrders error:', err)
-    } finally {
-      setLoading(false)
+      if (!cancelled) {
+        setOrders(ordersWithItems)
+      }
     }
-  }
+
+    restoreProfile().catch((error) => {
+      console.error('Unable to restore profile data from Supabase:', error)
+    }).finally(() => {
+      if (!cancelled) {
+        setProfileOwnerId(user.id)
+        setLoading(false)
+      }
+    })
+
+    return () => { cancelled = true }
+  }, [user?.id])
 
   const handleSaveAddress = async () => {
     if (!user) return
@@ -83,7 +123,7 @@ const Profile = () => {
         data: { address: payload }
       })
       if (error) throw error
-      setProfile(payload)
+      setProfile((current) => ({ ...current, ...payload }))
       setEditing(false)
       toast.success('Address saved!')
     } catch (_err) {
@@ -103,7 +143,9 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState('orders')
   const { wishlistProducts, removeFromWishlist, loading: wishlistLoading, refetch } = useWishlist()
 
-  if (loading) {
+  if (!user) return null
+
+  if (loading || profileOwnerId !== user.id) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <Loader className="h-8 w-8 text-purple-600 animate-spin" />
@@ -121,7 +163,7 @@ const Profile = () => {
               <User className="h-7 w-7 text-purple-600" />
             </div>
             <div>
-              <h1 className="text-lg font-bold text-gray-900">{user?.user_metadata?.name || user?.email}</h1>
+              <h1 className="text-lg font-bold text-gray-900">{profile?.name || profileSummary?.name || user?.user_metadata?.name || user?.email}</h1>
               <p className="text-sm text-gray-500">{user?.email}</p>
             </div>
           </div>

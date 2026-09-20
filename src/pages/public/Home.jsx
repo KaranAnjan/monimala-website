@@ -73,7 +73,7 @@ const Home = () => {
       <HeroSection />
 
       {/* Featured Products */}
-      <section className="bg-gray-50 py-12 md:py-16">
+      <section id="featured" className="bg-gray-50 py-12 md:py-16 scroll-mt-20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-end justify-between mb-8">
             <div>

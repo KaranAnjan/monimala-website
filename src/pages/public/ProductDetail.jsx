@@ -79,7 +79,7 @@ const ProductDetail = () => {
               )}
             </div>
             <button
-              onClick={() => toggleWishlist(product.id)}
+              onClick={() => toggleWishlist(product)}
               className="absolute top-3 right-3 p-2 rounded-full bg-white/80 hover:bg-white shadow-sm transition-all z-10"
             >
               <Heart className={`h-5 w-5 transition-colors ${isInWishlist(product.id) ? 'fill-purple-600 text-purple-600' : 'text-gray-600'}`} />
